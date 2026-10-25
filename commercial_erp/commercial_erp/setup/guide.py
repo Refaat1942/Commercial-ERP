@@ -234,3 +234,63 @@ def ensure_setup_guide():
 			"custom_blocks": [{"custom_block_name": SETUP_BLOCK, "label": SETUP_BLOCK}],
 		}
 	).insert(ignore_permissions=True)
+
+
+HEALTH_BLOCK = "Health Check"
+HEALTH_WORKSPACE = "Health Check"
+HEALTH_SCRIPT = """
+const box = root_element.querySelector('.ce-health-body');
+frappe.call({method: 'commercial_erp.api.health_check', callback: (r) => {
+  const d = r.message; if (!d) return;
+  const esc = frappe.utils.escape_html;
+  let html = `<div class="summary ${d.ok ? 'ok' : 'bad'}">${d.ok ? '✓' : '✗'} ${esc(d.passed + ' / ' + d.total)} ${esc(d.ok ? __('All checks passed') : __('Some checks need attention'))}</div>`;
+  d.checks.forEach(c => { html += `<div class="row ${c.ok ? 'ok' : 'bad'}"><span class="m">${c.ok ? '✓' : '✗'}</span><span>${esc(c.message)}</span></div>`; });
+  box.innerHTML = html;
+}});
+"""
+HEALTH_STYLE = """
+.ce-health{max-width:900px}
+.ce-health .summary{font-size:18px;font-weight:700;padding:14px 16px;border-radius:12px;margin-bottom:12px}
+.ce-health .summary.ok{background:#E3F4EA;color:#14663F}.ce-health .summary.bad{background:#FBE7E4;color:#9B2C1F}
+.ce-health .row{display:flex;gap:12px;align-items:flex-start;padding:10px 14px;border:1px solid #E1E9E8;border-radius:10px;background:#fff;margin-bottom:8px;line-height:1.6}
+.ce-health .m{flex:0 0 22px;font-weight:700}.ce-health .row.ok .m{color:#1E8E5A}.ce-health .row.bad{border-color:#E6A39A}.ce-health .row.bad .m{color:#B5473A}
+"""
+
+
+def ensure_health_check():
+	html_ = '<div class="ce-health" dir="auto"><div class="ce-health-body text-muted">...</div></div>'
+	fields = {"html": html_, "style": HEALTH_STYLE, "script": HEALTH_SCRIPT}
+	if frappe.db.exists("Custom HTML Block", HEALTH_BLOCK):
+		frappe.db.set_value("Custom HTML Block", HEALTH_BLOCK, fields)
+	else:
+		frappe.get_doc({"doctype": "Custom HTML Block", "name": HEALTH_BLOCK, "private": 0, **fields}).insert(
+			ignore_permissions=True
+		)
+	blocks = [
+		{
+			"id": "h1",
+			"type": "header",
+			"data": {"text": '<span class="h4">فحص سلامة الحسابات والمخزون</span>', "col": 12},
+		},
+		{"id": "h2", "type": "custom_block", "data": {"custom_block_name": HEALTH_BLOCK, "col": 12}},
+	]
+	if frappe.db.exists("Workspace", HEALTH_WORKSPACE):
+		frappe.db.set_value(
+			"Workspace", HEALTH_WORKSPACE, "content", json.dumps(blocks), update_modified=False
+		)
+		return
+	frappe.get_doc(
+		{
+			"doctype": "Workspace",
+			"name": HEALTH_WORKSPACE,
+			"label": HEALTH_WORKSPACE,
+			"title": "Accounting Health Check",
+			"module": "Shop",
+			"public": 1,
+			"type": "Workspace",
+			"icon": "shield-check",
+			"sequence_id": 0.8,
+			"content": json.dumps(blocks),
+			"custom_blocks": [{"custom_block_name": HEALTH_BLOCK, "label": HEALTH_BLOCK}],
+		}
+	).insert(ignore_permissions=True)

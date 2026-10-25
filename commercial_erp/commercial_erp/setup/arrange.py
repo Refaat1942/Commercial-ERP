@@ -19,18 +19,21 @@ DOCK_HIDDEN = ["Manufacturing", "Projects", "Assets", "Quality", "CRM", "Support
 
 SIDEBAR_MODULES = ["Selling", "Buying", "Stock", "Accounts", "Setup"]
 
-ARRANGE_VERSION = "7"  # bump to re-apply the site-level navigation layers on existing sites
+ARRANGE_VERSION = "8"  # bump to re-apply the site-level navigation layers on existing sites
 
 
 def apply():
 	remove_onboarding()
 	clean_navbar()
 	full_numbers()
+	fast_reports()
+	simplify_forms()
 	ensure_shop_workspace()  # the dock pins it, so it must exist first
 	from commercial_erp.setup import guide
 
 	guide.ensure()
 	guide.ensure_setup_guide()
+	guide.ensure_health_check()
 	ensure_shop_sidebar()
 	if frappe.db.get_default("ce_arrange_version") != ARRANGE_VERSION:
 		_reset_layers()
@@ -40,6 +43,7 @@ def apply():
 	trim_global_search()
 	for module in SIDEBAR_MODULES:
 		arrange_sidebar(module)
+	simplify_workspaces()
 	set_default_workspace()
 	package = (
 		frappe.db.get_single_value("FES Settings", "package")
@@ -185,11 +189,83 @@ def full_numbers():
 			)
 
 
+KEEP_WORKSPACES = {
+	"Selling",
+	"Buying",
+	"Stock",
+	"Accounting",
+	"Home",
+	"Shop",
+	"Guide",
+	"Setup Guide",
+	"Health Check",
+}
+MODULE_HOMES = ["Selling", "Buying", "Stock", "Accounting", "Home"]
+
+# Tabs/sections of the daily forms a one-shop business never uses (hidden, not deleted: Customize Form brings them back)
+HIDDEN_FORM_PARTS = {
+	"Item": ["manufacturing", "quality_tab", "variants_section"],
+	"Customer": ["portal_users_tab", "sales_team_tab"],
+	"Supplier": ["portal_users_tab"],
+	"Stock Entry": ["supplier_info_tab"],
+	"Journal Entry": ["tax_withholding_tab"],
+	"Purchase Order": ["drop_ship"],
+}
+
+
+def simplify_workspaces():
+	"""Module landing pages keep their charts/number cards; the long link cards are replaced by the sidebar.
+	Workspaces of modules a shop does not use are hidden."""
+	for name in MODULE_HOMES:
+		if not frappe.db.exists("Workspace", name):
+			continue
+		try:
+			blocks = json.loads(frappe.db.get_value("Workspace", name, "content") or "[]")
+		except ValueError:
+			continue
+		kept = [b for b in blocks if b.get("type") not in ("card", "onboarding", "quick_list")]
+		if len(kept) != len(blocks):
+			frappe.db.set_value("Workspace", name, "content", json.dumps(kept), update_modified=False)
+	for name in frappe.get_all("Workspace", filters={"public": 1}, pluck="name"):
+		hide = 0 if name in KEEP_WORKSPACES else 1
+		if frappe.db.get_value("Workspace", name, "is_hidden") != hide:
+			frappe.db.set_value("Workspace", name, "is_hidden", hide, update_modified=False)
+
+
+def simplify_forms():
+	for doctype, fieldnames in HIDDEN_FORM_PARTS.items():
+		if not frappe.db.exists("DocType", doctype):
+			continue
+		meta = frappe.get_meta(doctype)
+		for fieldname in fieldnames:
+			if meta.has_field(fieldname) and not meta.get_field(fieldname).hidden:
+				frappe.make_property_setter(
+					{
+						"doctype": doctype,
+						"doctype_or_field": "DocField",
+						"fieldname": fieldname,
+						"property": "hidden",
+						"value": "1",
+						"property_type": "Check",
+					},
+					validate_fields_for_doctype=False,
+				)
+
+
+def fast_reports():
+	"""Upstream generates some reports in the background ("Generate New Report"), which needs workers and extra
+	clicks; a one-shop database is small, so run them instantly."""
+	if frappe.get_meta("Report").has_field("prepared_report"):
+		frappe.db.sql("update `tabReport` set prepared_report = 0 where prepared_report = 1")
+
+
 def after_migrate():
 	"""Standard sync can bring back onboarding/help links; the layered arrangements persist."""
 	remove_onboarding()
 	clean_navbar()
 	full_numbers()
+	fast_reports()
+	simplify_workspaces()
 
 
 # --- upstream content that does not belong in a branded product -------------------------------

@@ -29,6 +29,10 @@ Reference repo (ERPNext v17-dev source) is untouched. New, additive directory `c
 - Fratelanza 2026 branding (login footer, website copyright, e-mail footer, NOTICE).
 - In-app time-limited Demo Links (demo site only), 30/30 tests.
 
+## Round 4 (cleanup + integrity, verified on the test bench)
+- Accounting health check (13 checks: GL balanced, every voucher balanced, all documents posted, stock = movements, stock value = stock account, customer/supplier ledgers = open items, VAT accounts = invoices, company wiring, EGP-only). Corruption tests prove each check can fail. 48/48 tests.
+- Module home pages without long link cards, unused workspaces hidden, unused form tabs hidden (Item manufacturing/quality/variants, Customer/Supplier portal & sales team ...), reports run instantly (no "background report" step), Arabic UOM names (Nos = قطعة).
+
 ## Next
 1. Run `deploy/vps_discovery.sh` on the VPS, then `deploy/install.sh` (docs/DEPLOYMENT.md).
 2. Re-run tests on the VPS; accountant review of chart/tax; Arabic translation review.
