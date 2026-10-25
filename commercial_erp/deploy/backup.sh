@@ -2,7 +2,7 @@
 # Daily backup (database + files) with 14-day retention. Run as the bench user (cron: see DEPLOYMENT.md).
 set -euo pipefail
 source "$(dirname "$0")/versions.env" 2>/dev/null || true
-BENCH_DIR="${BENCH_DIR:-/home/frappe/frappe-bench}"
+BENCH_DIR="${BENCH_DIR:-/home/fes/fes-bench}"
 SITE="${SITE:?set SITE, e.g. SITE=erp.local}"
 DEST="${BACKUP_DEST:-/var/backups/commercial-erp}"
 KEEP_DAYS="${KEEP_DAYS:-14}"

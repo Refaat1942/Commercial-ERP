@@ -10,7 +10,7 @@ import frappe
 from frappe.utils import add_days, add_months, getdate, nowdate
 
 
-def run(company_name, company_abbr, full_name="Administrator", email=None, fy_start_month=1):
+def run(company_name, company_abbr, full_name="Administrator", email=None, fy_start_month=1, brand="FES"):
 	if frappe.db.get_single_value("System Settings", "setup_complete"):
 		return "already complete"
 	today = getdate(nowdate())
@@ -46,5 +46,6 @@ def run(company_name, company_abbr, full_name="Administrator", email=None, fy_st
 		"User", {"name": ("in", frappe.STANDARD_USERS)}, {"language": "ar", "time_zone": "Africa/Cairo"}
 	)
 	disable_unverified_default_taxes(company_name)
+	frappe.db.set_single_value("Website Settings", "app_name", brand)  # name shown in titles/login
 	frappe.db.commit()
 	return "ok"
