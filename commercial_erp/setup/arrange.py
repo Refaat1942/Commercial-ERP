@@ -19,7 +19,7 @@ DOCK_HIDDEN = ["Manufacturing", "Projects", "Assets", "Quality", "CRM", "Support
 
 SIDEBAR_MODULES = ["Selling", "Buying", "Stock", "Accounts", "Setup"]
 
-ARRANGE_VERSION = "8"  # bump to re-apply the site-level navigation layers on existing sites
+ARRANGE_VERSION = "9"  # bump to re-apply the site-level navigation layers on existing sites
 
 
 def apply():
