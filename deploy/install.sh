@@ -14,7 +14,7 @@ source ./versions.env
 : "${SITE_NAME:?set SITE_NAME (internal label while you have no domain, e.g. erp.local)}"
 APP_REPO="${APP_REPO:-$(git -C .. remote get-url origin 2>/dev/null || true)}"
 : "${APP_REPO:?set APP_REPO (git URL of the private commercial_erp repository)}"
-APP_BRANCH="${APP_BRANCH:-main}"
+APP_BRANCH="${APP_BRANCH:-$(git -C .. rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)}"
 DEPLOY_KEY="/home/${BENCH_USER}/.ssh/deploy_key"
 log(){ printf '\n\033[1;32m==> %s\033[0m\n' "$*"; }
 die(){ printf '\033[1;31mERROR: %s\033[0m\n' "$*" >&2; exit 1; }

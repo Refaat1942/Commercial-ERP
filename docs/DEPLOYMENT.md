@@ -22,14 +22,8 @@ sudo bash deploy/vps_discovery.sh
 ```
 Send me the output if anything looks unexpected (existing nginx/MariaDB/Docker, port 15161 in use, <4 GB RAM).
 
-## 2. Create the private repo (once, from a clone of Commercial-ERP on your computer)
-1. GitHub -> New repository -> name `commercial_erp`, **Private**, no README/license.
-2. From a clone of `Refaat1942/Commercial-ERP` on branch `claude/magical-carson-oszji7`:
-```bash
-git subtree split -P commercial_erp -b commercial-erp-only
-git push git@github.com:Refaat1942/commercial_erp.git commercial-erp-only:main
-```
-The new repo root contains the app, `deploy/`, `docs/`, `license.txt` and `NOTICE`.
+## 2. Repository
+The deployable app lives on branch **`deployment-ready`** of `Refaat1942/Commercial-ERP` (root = `pyproject.toml`, app, `deploy/`, `docs/`; no ERPNext source). **Make the repo Private** (GitHub -> Settings -> General -> Danger Zone -> Change visibility) - the deploy key below works for private repos.
 
 ## 3. Install on the clean VPS (nothing needs to exist beforehand)
 Access to the private repo uses a **read-only deploy key** created on the VPS (no personal tokens):
@@ -43,9 +37,9 @@ sudo cat /home/frappe/.ssh/deploy_key.pub     # add as a Deploy key (leave "Allo
 Then fetch the installer and run it (port **15161**):
 ```bash
 sudo -u frappe GIT_SSH_COMMAND="ssh -i /home/frappe/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new" \
-  git clone git@github.com:Refaat1942/commercial_erp.git /home/frappe/commercial_erp_src
+  git clone --branch deployment-ready --single-branch git@github.com:Refaat1942/Commercial-ERP.git /home/frappe/commercial_erp_src
 sudo bash /home/frappe/commercial_erp_src/deploy/vps_discovery.sh                         # read-only look first
-sudo SITE_NAME=erp.local COMPANY_NAME="اسم المحل" COMPANY_ABBR=SH \
+sudo APP_BRANCH=deployment-ready SITE_NAME=erp.local COMPANY_NAME="اسم المحل" COMPANY_ABBR=SH \
   bash /home/frappe/commercial_erp_src/deploy/install.sh
 ```
 - `StrictHostKeyChecking=accept-new` trusts GitHub's key on first contact; compare with https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints if you want to be strict.
