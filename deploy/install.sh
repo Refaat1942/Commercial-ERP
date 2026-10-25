@@ -191,6 +191,9 @@ sleep 1
 # ---- 8. Processes + nginx on ${HTTP_PORT} (own, uniquely named config files) ----------------------------
 log "supervisor + nginx on port ${HTTP_PORT}"
 "${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench set-nginx-port '${SITE_NAME}' ${HTTP_PORT} && bench --site '${SITE_NAME}' enable-scheduler && bench setup supervisor --yes --skip-supervisord && bench setup nginx --yes"
+# bench's nginx template uses a "main" log format that a stock/shared nginx.conf does not define:
+# use the built-in "combined" format and our own log files instead (does not touch other sites' logs).
+sed -i -E 's#access_log +[^;]+;#access_log /var/log/nginx/commercial-erp.access.log combined;#; s#error_log +[^;]+;#error_log /var/log/nginx/commercial-erp.error.log;#' "${BENCH_DIR}/config/nginx.conf"
 ln -sfn "${BENCH_DIR}/config/supervisor.conf" /etc/supervisor/conf.d/commercial-erp.conf
 ln -sfn "${BENCH_DIR}/config/nginx.conf" /etc/nginx/conf.d/commercial-erp.conf
 systemctl enable --now supervisor nginx >/dev/null 2>&1 || true
