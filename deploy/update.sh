@@ -8,6 +8,7 @@ cd "$(dirname "$0")"
 source ./versions.env
 : "${SITE_NAME:?set SITE_NAME}"
 APP_BRANCH="${APP_BRANCH:-deployment-ready}"
+APP_REPO="${APP_REPO:-https://github.com/Refaat1942/Commercial-ERP.git}"
 log(){ printf '\n\033[1;32m==> %s\033[0m\n' "$*"; }
 [ "$(id -u)" -eq 0 ] || { echo "run as root (sudo)"; exit 1; }
 [ -d "${BENCH_DIR}/sites/${SITE_NAME}" ] || { echo "site ${SITE_NAME} not found in ${BENCH_DIR}"; exit 1; }
@@ -18,7 +19,8 @@ RUN=(sudo -H -u "${BENCH_USER}" env "PATH=/opt/commercial-erp-shims:/opt/node24/
 log "1/5 backup"
 "${RUN[@]}" env "SITE=${SITE_NAME}" "BENCH_DIR=${BENCH_DIR}" /usr/local/bin/commercial-erp-backup
 log "2/5 fetch new code (${APP_BRANCH})"
-"${RUN[@]}" git -C "${BENCH_DIR}/apps/commercial_erp" fetch origin "${APP_BRANCH}"
+# bench names the clone's remote "upstream", so fetch by URL
+"${RUN[@]}" git -C "${BENCH_DIR}/apps/commercial_erp" fetch "${APP_REPO}" "${APP_BRANCH}"
 "${RUN[@]}" git -C "${BENCH_DIR}/apps/commercial_erp" merge --ff-only FETCH_HEAD
 log "3/5 migrate + build assets"
 "${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench --site '${SITE_NAME}' migrate && bench build --app commercial_erp"
