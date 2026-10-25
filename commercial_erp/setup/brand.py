@@ -24,4 +24,13 @@ def apply():
 		"app_logo"
 	):
 		frappe.db.set_single_value("Navbar Settings", "app_logo", LOGO)
+	# e-mail footer: no upstream "Sent via ..." line; our own brand line instead
+	meta = frappe.get_meta("System Settings")
+	if meta.has_field("disable_standard_email_footer"):
+		frappe.db.set_single_value("System Settings", "disable_standard_email_footer", 1)
+	if meta.has_field("email_footer_address"):
+		frappe.db.set_single_value("System Settings", "email_footer_address", BRAND)
+	# the e-mail code reads these two from Defaults, not from System Settings
+	frappe.db.set_default("disable_standard_email_footer", 1)
+	frappe.db.set_default("email_footer_address", BRAND)
 	frappe.clear_cache()
