@@ -19,7 +19,7 @@ DOCK_HIDDEN = ["Manufacturing", "Projects", "Assets", "Quality", "CRM", "Support
 
 SIDEBAR_MODULES = ["Selling", "Buying", "Stock", "Accounts", "Setup"]
 
-ARRANGE_VERSION = "6"  # bump to re-apply the site-level navigation layers on existing sites
+ARRANGE_VERSION = "7"  # bump to re-apply the site-level navigation layers on existing sites
 
 
 def apply():
@@ -36,6 +36,8 @@ def apply():
 		_reset_layers()
 		frappe.db.set_default("ce_arrange_version", ARRANGE_VERSION)
 	arrange_dock()
+	hide_framework_dock()
+	trim_global_search()
 	for module in SIDEBAR_MODULES:
 		arrange_sidebar(module)
 	set_default_workspace()
@@ -119,9 +121,45 @@ def apply_package(package):
 	frappe.clear_cache()
 
 
+# Business-relevant documents for the Ctrl+K search (upstream also indexes leads, projects, web pages ...).
+GLOBAL_SEARCH_DOCTYPES = [
+	"Customer", "Supplier", "Item", "Item Group", "Sales Invoice", "Purchase Invoice", "Sales Order",
+	"Purchase Order", "Quotation", "Delivery Note", "Purchase Receipt", "Payment Entry", "Journal Entry",
+	"Material Request", "Stock Entry", "Stock Reconciliation", "Serial No", "Batch", "Warehouse", "Account",
+	"Contact", "Address", "Letter Head",
+]  # fmt: skip
+
+
+def hide_framework_dock():
+	"""The "Framework" app (developer tools: Build, Website, Integrations, Automation ...) is not for shop staff.
+	Its entries are hidden from the rail; what a shop administrator needs lives under Setup."""
+	from frappe.desk.doctype.dock.dock import _save_layer, get_app_dock
+
+	if get_site_dock("frappe"):
+		return
+	rows = [{**dict(r), "hidden": 1} for r in get_app_dock("frappe")]
+	if rows:
+		_save_layer("frappe", rows, user=None, require_visible=False)
+
+
+def trim_global_search():
+	"""Limit what Ctrl+K searches to documents a shop uses."""
+	if not frappe.db.exists("DocType", "Global Search Settings"):
+		return
+	doc = frappe.get_single("Global Search Settings")
+	wanted = [d for d in GLOBAL_SEARCH_DOCTYPES if frappe.db.exists("DocType", d)]
+	if [r.document_type for r in doc.allowed_in_global_search] == wanted:
+		return
+	doc.set("allowed_in_global_search", [{"document_type": d} for d in wanted])
+	doc.flags.ignore_permissions = True
+	doc.save()
+
+
 def _reset_layers():
 	"""Drop the site layers this app created earlier (never user-level layers)."""
-	for name in frappe.get_all("Dock", filters={"app": APP, "user": "", "standard": 0}, pluck="name"):
+	for name in frappe.get_all(
+		"Dock", filters={"app": ["in", [APP, "frappe"]], "user": "", "standard": 0}, pluck="name"
+	):
 		frappe.delete_doc("Dock", name, force=1, ignore_permissions=True)
 	for name in frappe.get_all(
 		"Custom Sidebar", filters={"user": "", "module": ["in", list(SIDEBAR_MODULES)]}, pluck="name"

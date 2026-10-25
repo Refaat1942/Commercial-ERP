@@ -34,6 +34,18 @@
 		});
 	}
 	new MutationObserver(translateDock).observe(document.documentElement, { childList: true, subtree: true });
+	// Open the shop dashboard instead of the generic apps screen.
+	function goHome() {
+		if (!window.frappe || !frappe.boot || !frappe.set_route) return false;
+		if (/^\/desk\/?$/.test(window.location.pathname) && frappe.session.user !== "Guest") {
+			frappe.set_route("shop");
+		}
+		return true;
+	}
+	var homeTries = 0;
+	var homeTimer = setInterval(function () {
+		if (goHome() || ++homeTries > 40) clearInterval(homeTimer);
+	}, 250);
 	var tries = 0;
 	var timer = setInterval(function () {
 		install();
