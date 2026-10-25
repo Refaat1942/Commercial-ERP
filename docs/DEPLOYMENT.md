@@ -71,6 +71,14 @@ Log in as `Administrator`; create users with Role Profiles `Shop Owner`, `Cashie
 3. Open ports 80/443 in UFW and the Hostinger panel, then `sudo bench setup lets-encrypt erp.example.com` (needs port 80 reachable). Keep or close 15161 afterwards.
 Nothing here is configured or claimed as secure until you complete this with a real domain.
 
+## 8a. Update the UI / app (after new commits on `deployment-ready`)
+```bash
+sudo -u fes git -C /home/fes/commercial_erp_src pull --ff-only          # get the newest scripts
+sudo SITE_NAME=erp.local bash /home/fes/commercial_erp_src/deploy/update.sh
+```
+Takes a backup first, fast-forwards the app, migrates, rebuilds assets, re-applies the (idempotent) navigation/branding/Egypt masters, restarts services.
+Demo data for testing: see `docs/DEMO.md`.
+
 ## 8. Upgrade
 ```bash
 sudo -u fes bash -c 'cd ~/fes-bench && bench --site SITE backup --with-files'   # always first

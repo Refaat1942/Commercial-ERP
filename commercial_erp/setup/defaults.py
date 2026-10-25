@@ -45,7 +45,19 @@ def apply_system_defaults():
 	if frappe.db.exists("Language", "en"):
 		frappe.db.set_value("Language", "en", "enabled", 1)
 	if frappe.db.exists("Currency", "EGP"):
-		frappe.db.set_value("Currency", "EGP", {"enabled": 1, "symbol": EGP_SYMBOL})
+		frappe.db.set_value(
+			"Currency",
+			"EGP",
+			{
+				"enabled": 1,
+				"symbol": EGP_SYMBOL,
+				"symbol_on_right": 1,
+				"fraction": "قرش",
+				"number_format": "#,###.##",
+			},
+		)
+		if not frappe.db.get_single_value("Global Defaults", "default_currency"):
+			frappe.db.set_single_value("Global Defaults", "default_currency", "EGP")
 
 
 def apply_stock_defaults():

@@ -16,6 +16,11 @@ Reference repo (ERPNext v17-dev source) is untouched. New, additive directory `c
 ## Not verified
 - Anything on the real VPS (install.sh, nginx 15161, ufw, supervisor, HTTPS), MariaDB 11.8, real-paper PDF, ETA/tax compliance. See `docs/COMPLIANCE_AND_LIMITATIONS.md`.
 
+## UI / demo round (verified on the test bench)
+- Theme (teal/gold, Cairo font bundled, module colours), FES ERP branding, new login page (AR/EN toggle, mobile), shop dashboard (number cards + chart + shortcuts), simplified module rail and sidebars, Egypt masters (27 governorates, UOMs, price lists, wallet accounts), in-app language switch, EGP formatting (`ج.م` after the number).
+- Tests: 22/22 pass (`bench run-tests --app commercial_erp`). Demo seed -> 336 sales invoices, 10 purchase invoices, GL balanced; `demo.clear` leaves zero residue (checked).
+- Not yet run on the VPS: `deploy/update.sh`, `deploy/create_demo_site.sh`.
+
 ## Next
 1. Run `deploy/vps_discovery.sh` on the VPS, then `deploy/install.sh` (docs/DEPLOYMENT.md).
 2. Re-run tests on the VPS; accountant review of chart/tax; Arabic translation review.

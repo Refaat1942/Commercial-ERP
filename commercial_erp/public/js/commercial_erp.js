@@ -1,0 +1,30 @@
+// Language switcher (Arabic <-> English) for the signed-in user; the page reloads in the new language.
+(function () {
+	function install() {
+		if (!window.frappe || !frappe.boot || frappe.session.user === "Guest") return;
+		if (document.getElementById("ce-lang-switch")) return;
+		var host = document.querySelector(".dock-utilities") || document.querySelector(".navbar .navbar-right, .navbar .nav");
+		if (!host) return;
+		var current = (frappe.boot.lang || "ar").split("-")[0];
+		var target = current === "ar" ? "en" : "ar";
+		var btn = document.createElement("button");
+		btn.id = "ce-lang-switch";
+		btn.className = "dock-item";
+		btn.type = "button";
+		btn.title = target === "en" ? "English" : "العربية";
+		btn.innerHTML = '<span class="dock-item-icon ce-lang-label">' + (target === "en" ? "EN" : "ع") + "</span>";
+		btn.addEventListener("click", function () {
+			frappe.call({
+				method: "commercial_erp.api.set_language",
+				args: { lang: target },
+				callback: function () { window.location.reload(); },
+			});
+		});
+		host.prepend(btn);
+	}
+	var tries = 0;
+	var timer = setInterval(function () {
+		install();
+		if (document.getElementById("ce-lang-switch") || ++tries > 40) clearInterval(timer);
+	}, 500);
+})();
