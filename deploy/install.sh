@@ -62,7 +62,6 @@ bind-address = 127.0.0.1
 character-set-client-handshake = FALSE
 character-set-server = utf8mb4
 collation-server = utf8mb4_unicode_ci
-skip-name-resolve
 [mysql]
 default-character-set = utf8mb4
 EOF
@@ -155,8 +154,6 @@ if [ "$SITE_EXISTS" -eq 0 ]; then
 	CRED="$(mktemp)"; chmod 600 "$CRED"
 	printf 'DBROOT=%q\nADMINPW=%q\n' "$DBROOT" "$ADMINPW" >"$CRED"
 	chown "${BENCH_USER}" "$CRED"   # after writing: /tmp refuses root writes into files owned by others
-	# Connect over the local unix socket: with skip-name-resolve a TCP 127.0.0.1 login would not match root@localhost
-	"${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench set-config -g db_host localhost"
 	"${RUN[@]}" bash -c ". '$CRED'; cd ${BENCH_DIR} && bench new-site '${SITE_NAME}' --mariadb-root-username root --mariadb-root-password \"\$DBROOT\" --admin-password \"\$ADMINPW\" --install-app erpnext --install-app commercial_erp --set-default" \
 		|| { shred -u "$CRED"; die "bench new-site failed; nothing pre-existing was modified"; }
 	shred -u "$CRED"; unset DBROOT ADMINPW
