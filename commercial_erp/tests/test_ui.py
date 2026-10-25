@@ -78,3 +78,25 @@ class TestBrandingAndNavigation(IntegrationTestCase):
 		}
 		self.assertIn("Sales Invoice", doctypes)
 		self.assertFalse(doctypes & {"Web Page", "Lead", "Work Order", "Project", "Country"})
+
+	def test_module_landing_pages_have_no_long_link_cards(self):
+		arrange.simplify_workspaces()
+		for name in arrange.MODULE_HOMES:
+			content = frappe.db.get_value("Workspace", name, "content") or ""
+			self.assertNotIn('"type": "card"', content)
+
+	def test_unused_module_workspaces_are_hidden(self):
+		arrange.simplify_workspaces()
+		for name in ("Manufacturing", "Projects", "Assets", "Support", "CRM"):
+			if frappe.db.exists("Workspace", name):
+				self.assertEqual(frappe.db.get_value("Workspace", name, "is_hidden"), 1)
+		self.assertEqual(frappe.db.get_value("Workspace", "Shop", "is_hidden"), 0)
+
+	def test_reports_run_instantly(self):
+		arrange.fast_reports()
+		self.assertFalse(frappe.db.count("Report", {"prepared_report": 1}))
+
+	def test_unused_form_tabs_are_hidden(self):
+		arrange.simplify_forms()
+		meta = frappe.get_meta("Item")
+		self.assertTrue(meta.get_field("manufacturing").hidden)

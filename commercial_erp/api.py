@@ -84,3 +84,10 @@ def setup_status():
 	from commercial_erp.setup.checklist import status
 
 	return status()
+
+
+@frappe.whitelist()
+def health_check():
+	from commercial_erp.setup.audit import run
+
+	return run()
