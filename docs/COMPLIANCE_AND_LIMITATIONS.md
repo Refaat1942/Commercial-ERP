@@ -24,3 +24,6 @@
 - English UI: strings that upstream never translated keep their original wording; Arabic is complete only to the extent of upstream's Arabic translation plus `translations/ar.csv`.
 - Navigation: modules a one-shop business rarely needs (Manufacturing, Projects, Assets, Quality, CRM, Support, Portal) are hidden from the module rail and advanced sidebar items are hidden using Frappe's own *Dock* / *Custom Sidebar* site layers (reset them in the UI to get the standard navigation back).
 - Demo seed uses invented prices/quantities, applies no tax, and must not be run on a site with real data.
+
+## Why upstream code is not deleted
+Unused ERPNext/Frappe pages are hidden and blocked per user (permissions), not deleted from the code: the apps share one database schema and update mechanism, so removing modules would break `bench migrate`/updates, and the GPL requires keeping the upstream authors' copyright and licence notices. Everything a user sees is branded FES ERP.

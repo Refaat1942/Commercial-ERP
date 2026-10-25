@@ -3,7 +3,7 @@
     env/bin/python apps/commercial_erp/tools/gen_brand_translations.py
 
 For every UI string in ERPNext/Frappe containing the upstream product name, writes the same string
-with "FES ERP" instead, to translations/en.csv and (using the upstream Arabic translation) ar.csv.
+with "FES ERP" / "FES" instead, to translations/en.csv and (using the upstream Arabic translation) ar.csv.
 Hand-written overrides live in translations/_manual_ar.csv and always win.
 """
 
@@ -15,7 +15,15 @@ import sys
 from babel.messages.pofile import read_po
 
 BRAND = "FES ERP"
-UPSTREAM_NAMES = ("ERPNext", "Erpnext", "ERPnext")
+# longest first, so "Frappe Framework" is not turned into "FES Framework"
+REPLACEMENTS = (
+	("Frappe Framework", BRAND),
+	("ERPNext", BRAND),
+	("Erpnext", BRAND),
+	("ERPnext", BRAND),
+	("Frappe", "FES"),
+)
+UPSTREAM_NAMES = tuple(old for old, _new in REPLACEMENTS)
 BENCH_APPS = os.path.abspath(
 	sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), "..", "..")
 )
@@ -23,13 +31,17 @@ OUT = os.path.join(os.path.dirname(__file__), "..", "commercial_erp", "translati
 
 
 def swap(text):
-	for name in UPSTREAM_NAMES:
-		text = text.replace(name, BRAND)
+	for old, new in REPLACEMENTS:
+		text = text.replace(old, new)
 	return text
 
 
+# copyright / licence / authorship notices keep the original authors' names (GPL attribution)
+KEEP_AUTHORSHIP = ("©", "&copy;", "Copyright", "copyright", "Technologies", "licen", "Licen")
+
+
 def has_name(text):
-	return any(n in text for n in UPSTREAM_NAMES)
+	return any(n in text for n in UPSTREAM_NAMES) and not any(k in text for k in KEEP_AUTHORSHIP)
 
 
 def messages(path):

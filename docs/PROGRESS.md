@@ -33,6 +33,12 @@ Reference repo (ERPNext v17-dev source) is untouched. New, additive directory `c
 - Accounting health check (13 checks: GL balanced, every voucher balanced, all documents posted, stock = movements, stock value = stock account, customer/supplier ledgers = open items, VAT accounts = invoices, company wiring, EGP-only). Corruption tests prove each check can fail. 48/48 tests.
 - Module home pages without long link cards, unused workspaces hidden, unused form tabs hidden (Item manufacturing/quality/variants, Customer/Supplier portal & sales team ...), reports run instantly (no "background report" step), Arabic UOM names (Nos = قطعة).
 
+## Round 5 (simple mode + theme v2, verified on the test bench)
+- Simple mode: ~150 rarely used fields/sections hidden on Sales/Purchase Invoice, Payment Entry, Customer, Supplier, Item (`simplify.restore()` brings them back); 14 unused modules blocked per user (once, so they can be unblocked). A cashier still creates and submits a sales invoice in the browser (checked).
+- Theme v2: dark module rail with bright module colours, solid active items, card forms with accent bars, stronger tables/badges, coloured charts.
+- "Frappe"/"ERPNext" replaced in UI texts (43 strings); copyright/licence notices deliberately untouched (GPL).
+- 52/52 tests.
+
 ## Next
 1. Run `deploy/vps_discovery.sh` on the VPS, then `deploy/install.sh` (docs/DEPLOYMENT.md).
 2. Re-run tests on the VPS; accountant review of chart/tax; Arabic translation review.
