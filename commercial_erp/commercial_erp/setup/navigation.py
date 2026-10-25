@@ -33,7 +33,6 @@ SIDEBARS = {
 			"Prices & Discounts",
 			[
 				("Price List", "DocType", "Price List", "tag"),
-				("Item Price", "DocType", "Item Price", "banknote"),
 				("Pricing Rule", "DocType", "Pricing Rule", "percent"),
 			],
 		),
@@ -81,7 +80,6 @@ SIDEBARS = {
 				("Item", "DocType", "Item", "package"),
 				("Item Group", "DocType", "Item Group", "layers"),
 				("Unit of Measure (UOM)", "DocType", "UOM", "ruler"),
-				("Brand", "DocType", "Brand", "tag"),
 			],
 		),
 		(
@@ -101,7 +99,6 @@ SIDEBARS = {
 				("Stock Balance", "Report", "Stock Balance", "list"),
 				("Stock Ledger", "Report", "Stock Ledger", "book-open"),
 				("Low Stock Items", "Report", "Stock Projected Qty", "triangle-alert"),
-				("Stock Ageing", "Report", "Stock Ageing", "hourglass"),
 			],
 		),
 		("Stock Setup", [("Stock Settings", "DocType", "Stock Settings", "settings")]),
@@ -170,14 +167,12 @@ SIDEBARS = {
 				("Print Format", "DocType", "Print Format", "printer"),
 				("Letter Head", "DocType", "Letter Head", "file-text"),
 				("Print Settings", "DocType", "Print Settings", "settings"),
-				("Email Account", "DocType", "Email Account", "mail"),
 			],
 		),
 		(
 			"Data",
 			[
 				("Data Import", "DocType", "Data Import", "upload"),
-				("Rename Tool", "DocType", "Rename Tool", "pencil"),
 			],
 		),
 		(
@@ -186,10 +181,7 @@ SIDEBARS = {
 				("Customize Form", "DocType", "Customize Form", "sliders-horizontal"),
 				("Custom Field", "DocType", "Custom Field", "plus-square"),
 				("Reports List", "DocType", "Report", "list"),
-				("Notification", "DocType", "Notification", "bell"),
-				("Workflow", "DocType", "Workflow", "git-branch"),
 				("Error Log", "DocType", "Error Log", "bug"),
-				("Scheduled Job Log", "DocType", "Scheduled Job Log", "clock"),
 				("Global Search Settings", "DocType", "Global Search Settings", "search"),
 			],
 		),

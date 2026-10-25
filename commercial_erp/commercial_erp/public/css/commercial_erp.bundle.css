@@ -253,3 +253,10 @@ body{background:var(--ce-bg)!important}
 
 /* ---- module accent for the new pages ---- */
 body:has(.dock-item.active[aria-label="Shop"]){--ce-module:#0B6B63}
+
+/* ---- less chrome: likes, comment counters, tags, sharing and assignment widgets are not used in a shop ---- */
+.list-row-activity .like-action,.list-row-activity .comment-count,.list-row-head .list-liked-by-me,
+.list-row-activity .list-row-like,.list-row .liked-by,.list-row-activity .mx-2{display:none!important}
+.form-sidebar .form-tags,.form-sidebar .form-shared,.form-sidebar .form-assignments,.form-sidebar .pageview-count,
+.form-sidebar .sidebar-rating{display:none!important}
+.form-sidebar .sidebar-image-section .sidebar-image-wrapper{display:none}
