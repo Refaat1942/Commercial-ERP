@@ -18,8 +18,16 @@ Reference repo (ERPNext v17-dev source) is untouched. New, additive directory `c
 
 ## UI / demo round (verified on the test bench)
 - Theme (teal/gold, Cairo font bundled, module colours), FES ERP branding, new login page (AR/EN toggle, mobile), shop dashboard (number cards + chart + shortcuts), simplified module rail and sidebars, Egypt masters (27 governorates, UOMs, price lists, wallet accounts), in-app language switch, EGP formatting (`ج.م` after the number).
-- Tests: 22/22 pass (`bench run-tests --app commercial_erp`). Demo seed -> 336 sales invoices, 10 purchase invoices, GL balanced; `demo.clear` leaves zero residue (checked).
+- Tests: 30/30 pass (`bench run-tests --app commercial_erp`). Demo seed -> 336 sales invoices, 10 purchase invoices, GL balanced; `demo.clear` leaves zero residue (checked).
 - Not yet run on the VPS: `deploy/update.sh`, `deploy/create_demo_site.sh`.
+
+## Round 3 (verified on the test bench)
+- Optional VAT 14% templates (sales/purchase, never default), legacy 0% placeholders retired; demo data shows VAT (output 6,129 / input 7,735, GL balanced).
+- Sidebars rebuilt as clear open sections per module (Selling, Buying, Stock, Accounts, Setup); dock versioned reset (`ARRANGE_VERSION`); shop dashboard is the landing page.
+- ~380 Arabic term overrides + in-app searchable "دليل المصطلحات"; dock tooltips translated.
+- EGP-only: other currencies disabled, price lists in EGP.
+- Fratelanza 2026 branding (login footer, website copyright, e-mail footer, NOTICE).
+- In-app time-limited Demo Links (demo site only), 30/30 tests.
 
 ## Next
 1. Run `deploy/vps_discovery.sh` on the VPS, then `deploy/install.sh` (docs/DEPLOYMENT.md).

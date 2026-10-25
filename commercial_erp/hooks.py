@@ -1,6 +1,6 @@
 app_name = "commercial_erp"
 app_title = "FES"
-app_publisher = "Commercial ERP"
+app_publisher = "Fratelanza"
 app_description = "Arabic-first commercial ERP configuration for small Egyptian shops and warehouses"
 app_email = "admin@example.com"
 app_license = "GPL-3.0-or-later"
@@ -27,3 +27,7 @@ doc_events = {
 }
 
 after_migrate = "commercial_erp.setup.update.after_migrate"
+
+scheduler_events = {"hourly": ["commercial_erp.api.expire_demo_links"]}
+
+before_request = ["commercial_erp.api.check_demo_session"]

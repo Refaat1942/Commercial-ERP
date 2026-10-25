@@ -125,7 +125,13 @@ def seed(days=45, seed_value=42):
 		supplier = f"{SUPPLIERS[supplier_idx][0]} {DEMO_SUFFIX}"
 		picks = [it for k, it in enumerate(ITEMS) if k % 4 == supplier_idx]
 		_purchase(
-			company, wh, supplier, add_days(today, -days), [(it[0], it[8], it[4]) for it in picks], stock
+			company,
+			wh,
+			supplier,
+			add_days(today, -days),
+			[(it[0], it[8], it[4]) for it in picks],
+			stock,
+			vat=i % 2 == 0,
 		)
 
 	# 2) trading days: sales (cash + credit), periodic restocking, payments, expenses
@@ -145,7 +151,9 @@ def seed(days=45, seed_value=42):
 			if not lines:
 				continue
 			cash = (not wholesale) or rnd.random() < 0.3
-			si = _sale(company, wh, customers[cust_idx], day, lines, stock)
+			si = _sale(
+				company, wh, customers[cust_idx], day, lines, stock, vat=wholesale and rnd.random() < 0.7
+			)
 			sales_invoices.append(si)
 			if cash:
 				_payment("Receive", "Sales Invoice", si, day, "Cash")
@@ -156,7 +164,13 @@ def seed(days=45, seed_value=42):
 			if low:
 				supplier = f"{SUPPLIERS[rnd.randrange(len(SUPPLIERS))][0]} {DEMO_SUFFIX}"
 				pi = _purchase(
-					company, wh, supplier, day, [(it[0], int(it[8] * 0.7), it[4]) for it in low], stock
+					company,
+					wh,
+					supplier,
+					day,
+					[(it[0], int(it[8] * 0.7), it[4]) for it in low],
+					stock,
+					vat=rnd.random() < 0.6,
 				)
 				if rnd.random() < 0.6:
 					_payment("Pay", "Purchase Invoice", pi, add_days(day, 5), "Cash")
@@ -242,7 +256,20 @@ def _masters(wh):
 				).insert(ignore_permissions=True)
 
 
-def _purchase(company, wh, supplier, day, lines, stock):
+def _add_vat(doc, template_doctype, company):
+	"""Apply the optional 14% VAT template (if the company has it) to a demo document."""
+	from erpnext.controllers.accounts_controller import get_taxes_and_charges
+
+	title = "ضريبة القيمة المضافة 14% - " + ("مبيعات" if "Sales" in template_doctype else "مشتريات")
+	name = frappe.db.get_value(template_doctype, {"title": title, "company": company})
+	if not name:
+		return
+	doc.taxes_and_charges = name
+	for row in get_taxes_and_charges(template_doctype, name):
+		doc.append("taxes", row)
+
+
+def _purchase(company, wh, supplier, day, lines, stock, vat=False):
 	doc = frappe.get_doc(
 		{
 			"doctype": "Purchase Invoice",
@@ -258,6 +285,8 @@ def _purchase(company, wh, supplier, day, lines, stock):
 			"items": [{"item_code": c, "qty": q, "rate": r, "warehouse": wh} for c, q, r in lines],
 		}
 	)
+	if vat:
+		_add_vat(doc, "Purchase Taxes and Charges Template", company)
 	doc.insert(ignore_permissions=True)
 	doc.submit()
 	for c, q, _r in lines:
@@ -265,7 +294,7 @@ def _purchase(company, wh, supplier, day, lines, stock):
 	return doc.name
 
 
-def _sale(company, wh, customer, day, lines, stock):
+def _sale(company, wh, customer, day, lines, stock, vat=False):
 	doc = frappe.get_doc(
 		{
 			"doctype": "Sales Invoice",
@@ -280,6 +309,8 @@ def _sale(company, wh, customer, day, lines, stock):
 			"items": [{"item_code": c, "qty": q, "rate": r, "warehouse": wh} for c, q, r in lines],
 		}
 	)
+	if vat:
+		_add_vat(doc, "Sales Taxes and Charges Template", company)
 	doc.insert(ignore_permissions=True)
 	doc.submit()
 	for c, q, _r in lines:

@@ -1,0 +1,36 @@
+{
+ "actions": [],
+ "autoname": "format:DEMO-{####}",
+ "creation": "2026-10-25 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["customer_name", "role_profile", "valid_hours", "column_break_1", "status", "valid_until", "demo_user", "section_link", "login_link", "notes", "token_hash"],
+ "fields": [
+  {"fieldname": "customer_name", "fieldtype": "Data", "in_list_view": 1, "label": "Customer Name", "reqd": 1},
+  {"default": "Cashier", "fieldname": "role_profile", "fieldtype": "Select", "in_list_view": 1, "label": "Demo Role", "options": "Owner\nCashier\nStorekeeper\nAccountant", "reqd": 1},
+  {"default": "48", "description": "How long the link works, in hours (1 - 720).", "fieldname": "valid_hours", "fieldtype": "Int", "label": "Valid For (hours)", "reqd": 1},
+  {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+  {"default": "Active", "fieldname": "status", "fieldtype": "Select", "in_list_view": 1, "in_standard_filter": 1, "label": "Status", "options": "Active\nExpired\nRevoked", "read_only": 1},
+  {"fieldname": "valid_until", "fieldtype": "Datetime", "in_list_view": 1, "label": "Valid Until", "read_only": 1},
+  {"fieldname": "demo_user", "fieldtype": "Data", "label": "Demo User", "read_only": 1},
+  {"fieldname": "section_link", "fieldtype": "Section Break", "label": "Link"},
+  {"description": "Send this link to the customer. It signs them in as the demo user until it expires.", "fieldname": "login_link", "fieldtype": "Small Text", "label": "Demo Link", "read_only": 1},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"},
+  {"fieldname": "token_hash", "fieldtype": "Data", "hidden": 1, "label": "Token Hash", "read_only": 1}
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-10-25 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Commercial ERP",
+ "name": "Demo Link",
+ "owner": "Administrator",
+ "permissions": [
+  {"create": 1, "delete": 1, "email": 1, "print": 1, "read": 1, "report": 1, "role": "System Manager", "share": 1, "write": 1}
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "customer_name",
+ "track_changes": 1
+}

@@ -17,84 +17,36 @@ SHOP_WORKSPACE = "Shop"
 DOCK_ORDER = ["Selling", "Buying", "Stock", "Accounts", "Setup"]
 DOCK_HIDDEN = ["Manufacturing", "Projects", "Assets", "Quality", "CRM", "Support", "Portal"]
 
-# Per module sidebar: labels (as in the base sidebar) to hide, advanced for a one-shop business.
-SIDEBAR_HIDE = {
-	"Selling": {"Sales Person", "POS Invoice"},
-	"Buying": {
-		"Request for Quotation",
-		"Supplier Quotation",
-		"Supplier Quotation Comparison",
-		"Supplier Scorecard",
-	},
-	"Stock": {
-		"Pick List",
-		"Landed Cost Voucher",
-		"Quality Inspection",
-		"Packing Slip",
-		"Serial & Batch",
-		"Serial No",
-		"Batch No",
-		"Serial and Batch Bundle",
-		"Inventory Dimension",
-		"Item Attribute",
-		"Tools",
-	},
-	"Accounts": {
-		"Consolidated Report",
-		"Banking",
-		"Bank Clearance",
-		"Tax Rule",
-		"Tax Withholding Category",
-		"Budgeting",
-		"Budget",
-		"Cost Center Allocation",
-		"Monthly Distribution",
-		"Budget Variance",
-		"Accounting Dimension",
-		"Account Category",
-		"Financial Report Template",
-		"Chart of Cost Centers",
-		"Currency Exchange",
-	},
-	"Setup": {
-		"Organization",
-		"Branch",
-		"Department",
-		"Designation",
-		"Holiday List",
-		"Authorization Rule",
-		"Integrations",
-		"Incoming Call Settings",
-		"Voice Call Settings",
-		"Call Log",
-		"Telephony Call Type",
-		"Communication Medium",
-		"Code List",
-		"Common Code",
-		"Bulk Transaction Log",
-		"Transaction Deletion Record",
-		"Manufacturing",
-		"Projects",
-		"CRM",
-		"Support",
-		"Subscription",
-		"Item Variant",
-		"Delivery",
-		"Appointment Booking",
-		"Stock Reposting",
-		"Currency Exchange",
-	},
-}
+SIDEBAR_MODULES = ["Selling", "Buying", "Stock", "Accounts", "Setup"]
+
+ARRANGE_VERSION = "4"  # bump to re-apply the site-level navigation layers on existing sites
 
 
 def apply():
 	remove_onboarding()
 	clean_navbar()
+	ensure_shop_workspace()  # the dock pins it, so it must exist first
+	from commercial_erp.setup import guide
+
+	guide.ensure()
+	if frappe.db.get_default("ce_arrange_version") != ARRANGE_VERSION:
+		_reset_layers()
+		frappe.db.set_default("ce_arrange_version", ARRANGE_VERSION)
 	arrange_dock()
-	for module in SIDEBAR_HIDE:
+	for module in SIDEBAR_MODULES:
 		arrange_sidebar(module)
-	ensure_shop_workspace()
 	set_default_workspace()
+
+
+def _reset_layers():
+	"""Drop the site layers this app created earlier (never user-level layers)."""
+	for name in frappe.get_all("Dock", filters={"app": APP, "user": "", "standard": 0}, pluck="name"):
+		frappe.delete_doc("Dock", name, force=1, ignore_permissions=True)
+	for name in frappe.get_all(
+		"Custom Sidebar", filters={"user": "", "module": ["in", list(SIDEBAR_MODULES)]}, pluck="name"
+	):
+		frappe.delete_doc("Custom Sidebar", name, force=1, ignore_permissions=True)
+	frappe.clear_cache()
 
 
 def after_migrate():
@@ -184,26 +136,15 @@ def arrange_dock():
 
 
 def arrange_sidebar(module):
+	"""Replace the module's sidebar by our own sections (upstream rows stay, hidden)."""
 	if get_customization(module, None):
 		return
-	hide = SIDEBAR_HIDE[module]
-	rows = [dict(r) for r in get_site_sidebar_layer(module)]
-	section_hidden = False
-	out = []
-	for row in rows:
-		is_section = row.get("type") == "Section Break"
-		label = row.get("label")
-		if is_section:
-			section_hidden = label in hide
-			row["hidden"] = 1 if section_hidden else 0
-		elif label in hide or (section_hidden and row.get("child")):
-			row["hidden"] = 1
-		else:
-			row["hidden"] = 0
-			if not row.get("child"):
-				section_hidden = False
-		out.append(row)
-	save_site_sidebar(module, out)
+	from commercial_erp.setup.navigation import SIDEBARS, build_rows
+
+	if module not in SIDEBARS:
+		return
+	hidden_base = [{**dict(r), "hidden": 1, "added": 0} for r in get_site_sidebar_layer(module)]
+	save_site_sidebar(module, build_rows(module) + hidden_base)
 
 
 # --- shop home workspace ------------------------------------------------------------------------
@@ -362,11 +303,16 @@ def set_default_workspace(user=None):
 	"""Make the shop dashboard the landing page for users who have not chosen another."""
 	if not frappe.db.exists("Workspace", SHOP_WORKSPACE):
 		return
-	filters = {"enabled": 1, "name": ["not in", ["Guest"]], "default_workspace": ["in", ["", None]]}
 	if user:
-		filters["name"] = user
-	for name in frappe.get_all("User", filters=filters, pluck="name"):
-		frappe.db.set_value("User", name, "default_workspace", SHOP_WORKSPACE, update_modified=False)
+		frappe.db.sql(
+			"update `tabUser` set default_workspace = %s where name = %s and ifnull(default_workspace, '') = ''",
+			(SHOP_WORKSPACE, user),
+		)
+	else:
+		frappe.db.sql(
+			"update `tabUser` set default_workspace = %s where name not in ('Guest') and ifnull(default_workspace, '') = ''",
+			(SHOP_WORKSPACE,),
+		)
 
 
 def on_user_created(doc, method=None):

@@ -15,6 +15,10 @@ def run():
 	install.create_roles_and_formats()
 	brand.apply()
 	masters_egypt.apply()
+	from commercial_erp.setup.company import setup_egypt_company
+
+	for company in frappe.get_all("Company", filters={"country": "Egypt"}, pluck="name"):
+		setup_egypt_company(company)
 	arrange.apply()
 	frappe.db.commit()
 	frappe.clear_cache()

@@ -59,11 +59,12 @@ def main():
 			if isinstance(translated, (tuple, list)):
 				translated = translated[0]
 			ar_rows[(msgid, ctx)] = swap(translated) if translated else swap(msgid)
-	manual = os.path.join(OUT, "_manual_ar.csv")
 	manual_rows = []
-	if os.path.exists(manual):
-		with open(manual, newline="", encoding="utf-8") as f:
-			manual_rows = [r for r in csv.reader(f) if r]
+	for name in ("_glossary_ar.csv", "_manual_ar.csv"):  # later files win
+		path = os.path.join(OUT, name)
+		if os.path.exists(path):
+			with open(path, newline="", encoding="utf-8") as f:
+				manual_rows += [r for r in csv.reader(f) if r]
 	for name, rows in (("en", en_rows), ("ar", ar_rows)):
 		buf = io.StringIO()
 		w = csv.writer(buf, lineterminator="\n")
