@@ -19,16 +19,18 @@ DOCK_HIDDEN = ["Manufacturing", "Projects", "Assets", "Quality", "CRM", "Support
 
 SIDEBAR_MODULES = ["Selling", "Buying", "Stock", "Accounts", "Setup"]
 
-ARRANGE_VERSION = "4"  # bump to re-apply the site-level navigation layers on existing sites
+ARRANGE_VERSION = "5"  # bump to re-apply the site-level navigation layers on existing sites
 
 
 def apply():
 	remove_onboarding()
 	clean_navbar()
+	full_numbers()
 	ensure_shop_workspace()  # the dock pins it, so it must exist first
 	from commercial_erp.setup import guide
 
 	guide.ensure()
+	ensure_shop_sidebar()
 	if frappe.db.get_default("ce_arrange_version") != ARRANGE_VERSION:
 		_reset_layers()
 		frappe.db.set_default("ce_arrange_version", ARRANGE_VERSION)
@@ -36,6 +38,45 @@ def apply():
 	for module in SIDEBAR_MODULES:
 		arrange_sidebar(module)
 	set_default_workspace()
+
+
+SHOP_SIDEBAR_NAME = "Shop"
+
+
+def ensure_shop_sidebar():
+	"""A sidebar of its own for the dashboard, so opening it does not switch to some module's navigation."""
+	from commercial_erp.setup.navigation import SHOP_SIDEBAR, rows_for
+
+	rows = rows_for(SHOP_SIDEBAR, "shop")
+	if not frappe.db.exists("Module Def", SHOP_SIDEBAR_NAME):  # sidebars are keyed by module
+		frappe.get_doc(
+			{
+				"doctype": "Module Def",
+				"module_name": SHOP_SIDEBAR_NAME,
+				"app_name": "commercial_erp",
+				"custom": 1,
+			}
+		).insert(ignore_permissions=True)
+	doc = (
+		frappe.get_doc("Sidebar", SHOP_SIDEBAR_NAME)
+		if frappe.db.exists("Sidebar", SHOP_SIDEBAR_NAME)
+		else frappe.new_doc("Sidebar")
+	)
+	doc.title = SHOP_SIDEBAR_NAME
+	doc.module = SHOP_SIDEBAR_NAME
+	doc.app = APP
+	doc.header_icon = "layout-dashboard"
+	doc.set("items", [])
+	for row in rows:
+		doc.append("items", {k: v for k, v in row.items() if k not in ("added", "hidden")})
+	doc.flags.ignore_permissions = True
+	# the app is placing its own navigation on the site: Frappe allows that under its system-write flags
+	previous = frappe.flags.in_patch
+	frappe.flags.in_patch = True
+	try:
+		doc.save()
+	finally:
+		frappe.flags.in_patch = previous
 
 
 def _reset_layers():
@@ -49,10 +90,28 @@ def _reset_layers():
 	frappe.clear_cache()
 
 
+def full_numbers():
+	"""Show real accounting numbers (64,880.00), never "64.88K"/"ك": number cards in full, charts without
+	shortened axes."""
+	frappe.db.sql("update `tabNumber Card` set show_full_number = 1 where ifnull(show_full_number, 0) = 0")
+	for name, options in frappe.get_all("Dashboard Chart", fields=["name", "custom_options"], as_list=True):
+		try:
+			opts = json.loads(options) if options else {}
+		except ValueError:
+			opts = {}
+		axis = opts.setdefault("axisOptions", {})
+		if axis.get("shortenYAxisNumbers") != 0:
+			axis["shortenYAxisNumbers"] = 0
+			frappe.db.set_value(
+				"Dashboard Chart", name, "custom_options", json.dumps(opts), update_modified=False
+			)
+
+
 def after_migrate():
 	"""Standard sync can bring back onboarding/help links; the layered arrangements persist."""
 	remove_onboarding()
 	clean_navbar()
+	full_numbers()
 
 
 # --- upstream content that does not belong in a branded product -------------------------------
@@ -113,9 +172,9 @@ def arrange_dock():
 	by_target = {(r.get("link_type"), r.get("link_to")): r for r in base}
 	rows = []
 	shop = {
-		"link_type": "Workspace",
-		"link_to": SHOP_WORKSPACE,
-		"icon": "home",
+		"link_type": "Sidebar",
+		"link_to": SHOP_SIDEBAR_NAME,
+		"icon": "layout-dashboard",
 		"title": "Shop",
 		"added": 1,
 		"hidden": 0,
@@ -249,13 +308,11 @@ def ensure_shop_workspace():
 			}
 		).insert(ignore_permissions=True)
 
-	if frappe.db.exists("Workspace", SHOP_WORKSPACE):
-		return
 	blocks = [
 		{
 			"id": "hdr1",
 			"type": "header",
-			"data": {"text": '<span class="h4">ملخص اليوم / Today\'s Summary</span>', "col": 12},
+			"data": {"text": '<span class="h4">ملخص اليوم</span>', "col": 12},
 		}
 	]
 	for i, (label, *_rest) in enumerate(NUMBER_CARDS):
@@ -265,18 +322,24 @@ def ensure_shop_workspace():
 		{
 			"id": "hdr2",
 			"type": "header",
-			"data": {"text": '<span class="h4">اختصارات سريعة / Quick Shortcuts</span>', "col": 12},
+			"data": {"text": '<span class="h4">اختصارات سريعة</span>', "col": 12},
 		}
 	)
 	for i, (label, *_rest) in enumerate(SHORTCUTS):
 		blocks.append({"id": f"sc{i}", "type": "shortcut", "data": {"shortcut_name": label, "col": 3}})
+	if frappe.db.exists("Workspace", SHOP_WORKSPACE):
+		if frappe.db.get_default("ce_arrange_version") != ARRANGE_VERSION:  # new layout: refresh what we own
+			frappe.db.set_value(
+				"Workspace", SHOP_WORKSPACE, "content", json.dumps(blocks), update_modified=False
+			)
+		return
 	ws = frappe.get_doc(
 		{
 			"doctype": "Workspace",
 			"name": SHOP_WORKSPACE,
 			"label": SHOP_WORKSPACE,
 			"title": "Shop",
-			"module": "Setup",
+			"module": SHOP_SIDEBAR_NAME,
 			"public": 1,
 			"type": "Workspace",
 			"icon": "home",

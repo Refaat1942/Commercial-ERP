@@ -9,8 +9,6 @@ GUIDE = ("Terms Guide", "Workspace", "Guide", "book-open")
 
 SIDEBARS = {
 	"Selling": [
-		SHOP,
-		GUIDE,
 		(
 			"Sales Documents",
 			[
@@ -48,8 +46,6 @@ SIDEBARS = {
 		),
 	],
 	"Buying": [
-		SHOP,
-		GUIDE,
 		(
 			"Purchase Documents",
 			[
@@ -77,8 +73,6 @@ SIDEBARS = {
 		),
 	],
 	"Stock": [
-		SHOP,
-		GUIDE,
 		(
 			"Items",
 			[
@@ -111,8 +105,6 @@ SIDEBARS = {
 		("Stock Setup", [("Stock Settings", "DocType", "Stock Settings", "settings")]),
 	],
 	"Accounts": [
-		SHOP,
-		GUIDE,
 		(
 			"Daily Money",
 			[
@@ -160,8 +152,6 @@ SIDEBARS = {
 		),
 	],
 	"Setup": [
-		SHOP,
-		GUIDE,
 		(
 			"Company & Users",
 			[
@@ -203,7 +193,7 @@ SIDEBARS = {
 }
 
 
-def build_rows(module):
+def build_rows(module, key_prefix=None):
 	"""Added rows for one module, in display order."""
 	rows = []
 	n = 0
@@ -222,15 +212,15 @@ def build_rows(module):
 					"keep_closed": 0,
 					"added": 1,
 					"hidden": 0,
-					"key": f"ce|{module}|section|{n}",
+					"key": f"ce|{key_prefix or module}|section|{n}",
 				}
 			)
 			for item in items:
 				n += 1
-				rows.append(_link(module, n, item, child=1))
+				rows.append(_link(key_prefix or module, n, item, child=1))
 		else:
 			n += 1
-			rows.append(_link(module, n, entry, child=0))
+			rows.append(_link(key_prefix or module, n, entry, child=0))
 	return rows
 
 
@@ -248,3 +238,38 @@ def _link(module, n, item, child):
 		"hidden": 0,
 		"key": f"ce|{module}|link|{n}",
 	}
+
+
+# The "Shop" shell (rail icon next to the modules): dashboard, guide, daily actions, key reports.
+SHOP_SIDEBAR = [
+	SHOP,
+	GUIDE,
+	(
+		"Daily Work",
+		[
+			("Sales Invoice", "DocType", "Sales Invoice", "receipt"),
+			("Purchase Invoice", "DocType", "Purchase Invoice", "receipt"),
+			("Payment Entry", "DocType", "Payment Entry", "credit-card"),
+			("Stock Entry", "DocType", "Stock Entry", "arrow-left-right"),
+		],
+	),
+	(
+		"Quick Reports",
+		[
+			("Stock Balance", "Report", "Stock Balance", "list"),
+			("Low Stock Items", "Report", "Stock Projected Qty", "triangle-alert"),
+			("Customer Balances", "Report", "Accounts Receivable", "wallet"),
+			("Supplier Balances", "Report", "Accounts Payable", "wallet"),
+			("Profit and Loss Statement", "Report", "Profit and Loss Statement", "trending-up"),
+		],
+	),
+]
+
+
+def rows_for(structure, key_prefix):
+	"""Added rows for any structure of links and sections (used by the custom Shop sidebar)."""
+	SIDEBARS["__tmp__"] = structure
+	try:
+		return build_rows("__tmp__", key_prefix)
+	finally:
+		del SIDEBARS["__tmp__"]

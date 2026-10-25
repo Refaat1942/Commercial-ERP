@@ -127,23 +127,26 @@ def ensure():
 			BLOCK_NAME,
 			{"html": block_html(), "style": BLOCK_STYLE, "script": BLOCK_SCRIPT},
 		)
-	if frappe.db.exists("Workspace", GUIDE_WORKSPACE):
-		return
 	blocks = [
 		{
 			"id": "g1",
 			"type": "header",
-			"data": {"text": '<span class="h4">دليل المصطلحات / Terms Guide</span>', "col": 12},
+			"data": {"text": '<span class="h4">دليل المصطلحات</span>', "col": 12},
 		},
 		{"id": "g2", "type": "custom_block", "data": {"custom_block_name": BLOCK_NAME, "col": 12}},
 	]
+	if frappe.db.exists("Workspace", GUIDE_WORKSPACE):
+		frappe.db.set_value(
+			"Workspace", GUIDE_WORKSPACE, "content", json.dumps(blocks), update_modified=False
+		)
+		return
 	frappe.get_doc(
 		{
 			"doctype": "Workspace",
 			"name": GUIDE_WORKSPACE,
 			"label": GUIDE_WORKSPACE,
 			"title": "Terms Guide",
-			"module": "Setup",
+			"module": "Shop",
 			"public": 1,
 			"type": "Workspace",
 			"icon": "book-open",

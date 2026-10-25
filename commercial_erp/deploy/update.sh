@@ -16,6 +16,16 @@ log(){ printf '\n\033[1;32m==> %s\033[0m\n' "$*"; }
 trap 'rc=$?; [ $rc -eq 0 ] || printf "\033[1;31mFAILED (exit %s) at line %s: %s\033[0m\nYour backup is in /var/backups/commercial-erp\n" "$rc" "$LINENO" "$BASH_COMMAND" >&2' EXIT
 RUN=(sudo -H -u "${BENCH_USER}" env "PATH=/opt/commercial-erp-shims:/opt/node24/bin:/opt/uv-venv/bin:/home/${BENCH_USER}/.local/bin:/usr/local/bin:/usr/bin:/bin")
 
+# one-word command for next time:  sudo fes-update
+cat >/usr/local/bin/fes-update <<EOF
+#!/usr/bin/env bash
+# Update FES ERP: fetch the newest scripts, then run the updater (takes a backup first).
+set -e
+sudo -u ${BENCH_USER} git -C /home/${BENCH_USER}/commercial_erp_src pull --ff-only
+SITE_NAME=\${SITE_NAME:-${SITE_NAME}} bash /home/${BENCH_USER}/commercial_erp_src/deploy/update.sh
+EOF
+chmod 755 /usr/local/bin/fes-update
+
 log "1/5 backup"
 "${RUN[@]}" env "SITE=${SITE_NAME}" "BENCH_DIR=${BENCH_DIR}" /usr/local/bin/commercial-erp-backup
 log "2/5 fetch new code (${APP_BRANCH})"
@@ -30,4 +40,4 @@ log "5/5 restart services"
 supervisorctl restart all >/dev/null
 sleep 5
 bash ./healthcheck.sh "${HTTP_PORT}" || true
-log "Updated. Hard-refresh the browser (Ctrl+F5)."
+log "Updated. Hard-refresh the browser (Ctrl+F5). Next time just run:  sudo fes-update"

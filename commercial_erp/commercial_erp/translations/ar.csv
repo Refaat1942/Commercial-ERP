@@ -419,6 +419,9 @@ This demo link has expired or is not valid. Please contact us for a new one.,ا�
 Send this link to the customer. It signs them in as the demo user until it expires.,أرسل هذا الرابط للعميل؛ يدخل به مباشرة كمستخدم تجريبي حتى تنتهي مدته.,
 "How long the link works, in hours (1 - 720).",مدة عمل الرابط بالساعات (من 1 إلى 720).,
 Demo links can only be created on a dedicated demo site. On that site run: bench --site <site> set-config allow_demo_links 1,روابط التجربة تُنشأ فقط على موقع تجريبي مستقل (يُفعَّل بإعداد allow_demo_links) حتى لا تفتح بيانات حقيقية.,
+Daily Work,العمل اليومي,
+Quick Reports,تقارير سريعة,
+Shop,المحل,
 Shop Owner,مالك المحل,Role Profile
 Cashier,أمين الصندوق / البائع,Role Profile
 Storekeeper,أمين المخزن,Role Profile
