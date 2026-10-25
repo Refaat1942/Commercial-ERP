@@ -47,3 +47,9 @@ class TestBrandingAndNavigation(IntegrationTestCase):
 	def test_egp_formatting(self):
 		cur = frappe.db.get_value("Currency", "EGP", ["symbol", "symbol_on_right", "enabled"], as_dict=True)
 		self.assertEqual((cur.symbol, cur.symbol_on_right, cur.enabled), ("ج.م", 1, 1))
+
+	def test_email_footer_has_no_upstream_branding(self):
+		from frappe.email.email_body import get_footer
+
+		brand.apply()
+		self.assertNotIn("ERPNext", get_footer(None))
