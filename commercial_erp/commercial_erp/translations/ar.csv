@@ -1,0 +1,6 @@
+Shop Owner,مالك المحل,Role Profile
+Cashier,أمين الصندوق / البائع,Role Profile
+Storekeeper,أمين المخزن,Role Profile
+Accountant,المحاسب,Role Profile
+Stock In Hand,مخزون البضاعة,Account name - corrects an upstream machine translation; accountant to review
+VAT - set the rate before use,ضريبة القيمة المضافة - حدد النسبة قبل الاستخدام,Tax template row description
