@@ -70,7 +70,7 @@ EOF
 else
 	INSTALLED="$(mariadb --version | grep -oE 'Distrib [0-9]+\.[0-9]+' | cut -d' ' -f2)"
 	log "MariaDB ${INSTALLED} already installed: configuration and service left untouched"
-	[ "$(printf '%s\n%s\n' "${MARIADB_SERIES}" "${INSTALLED}" | sort -V | head -1)" = "${MARIADB_SERIES}" ] || \
+	[ "$(printf '%s\n%s\n' "${MARIADB_SERIES}" "${INSTALLED}" | sort -V | sed -n 1p)" = "${MARIADB_SERIES}" ] || \
 		die "Existing MariaDB ${INSTALLED} is older than ${MARIADB_SERIES}. Upgrade it deliberately (backup first); this script will not."
 fi
 if ss -tlnH | awk '{print $4}' | grep -qE '^(0\.0\.0\.0|\*|\[::\]):3306$'; then
@@ -202,7 +202,7 @@ systemctl reload nginx
 supervisorctl reread >/dev/null && supervisorctl update >/dev/null
 
 # ---- 9. Firewall: never enabled automatically ---------------------------------------------------------------
-SSHP="$(sshd -T 2>/dev/null | awk '/^port /{print $2; exit}')"; SSHP="${SSHP:-22}"
+SSHP="$(sshd -T 2>/dev/null | awk '/^port /{p=$2} END{print p}')"; SSHP="${SSHP:-22}"
 if command -v ufw >/dev/null && ufw status | grep -q '^Status: active'; then
 	ufw allow "${HTTP_PORT}/tcp" >/dev/null && log "ufw (already active): allowed ${HTTP_PORT}/tcp"
 else
