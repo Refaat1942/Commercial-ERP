@@ -26,12 +26,15 @@ case "${VERSION_ID}" in 22.04|24.04) ;; *) die "Ubuntu 22.04/24.04 required (fou
 [ "$(awk '/MemTotal/{print int($2/1024)}' /proc/meminfo)" -ge 3500 ] || die "need >= 4 GB RAM (add swap otherwise)"
 if [ ! -d "${BENCH_DIR}" ] && ss -tlnH | grep -qE "[:.]${HTTP_PORT}\s"; then die "port ${HTTP_PORT} is already used by another service"; fi
 SITE_EXISTS=0; [ -d "${BENCH_DIR}/sites/${SITE_NAME}" ] && { SITE_EXISTS=1; log "Site ${SITE_NAME} already exists - it will not be touched"; }
-MARIADB_PREEXISTING=0; command -v mariadb >/dev/null && MARIADB_PREEXISTING=1
+MARIADB_MARKER=/etc/mysql/.commercial-erp-installed   # written by this script after it installs MariaDB
+MARIADB_PREEXISTING=0; if command -v mariadb >/dev/null && [ ! -e "$MARIADB_MARKER" ]; then MARIADB_PREEXISTING=1; fi
 
 # ---- 1. System packages (apt only adds packages; no existing config is replaced) --------
 log "System packages"
+# shellcheck disable=SC2154
+trap 'rc=$?; [ $rc -eq 0 ] || printf "\033[1;31mFAILED (exit %s) at line %s: %s\033[0m\n" "$rc" "$LINENO" "$BASH_COMMAND" >&2' EXIT
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -qq
+apt-get update -qq || log "apt-get update reported errors (often a third-party repo); continuing"
 apt-get install -y -qq git curl ca-certificates gnupg xz-utils build-essential pkg-config \
 	libffi-dev libssl-dev libmariadb-dev libjpeg-dev zlib1g-dev python3-venv python3-dev \
 	redis-server nginx supervisor cron openssl wkhtmltopdf fontconfig libfontconfig1 \
@@ -49,7 +52,8 @@ Suites: ${VERSION_CODENAME}
 Components: main
 Signed-By: /etc/apt/keyrings/mariadb-keyring.pgp
 EOF
-	apt-get update -qq && apt-get install -y -qq mariadb-server mariadb-client
+	apt-get update -qq || true
+	apt-get install -y -qq mariadb-server mariadb-client
 	cat >/etc/mysql/mariadb.conf.d/99-commercial-erp.cnf <<'EOF'
 [mysqld]
 bind-address = 127.0.0.1
@@ -61,6 +65,7 @@ skip-name-resolve
 default-character-set = utf8mb4
 EOF
 	systemctl enable --now mariadb && systemctl restart mariadb
+	touch "$MARIADB_MARKER"
 else
 	INSTALLED="$(mariadb --version | grep -oE 'Distrib [0-9]+\.[0-9]+' | cut -d' ' -f2)"
 	log "MariaDB ${INSTALLED} already installed: configuration and service left untouched"
