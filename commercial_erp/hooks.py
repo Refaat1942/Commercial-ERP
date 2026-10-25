@@ -8,10 +8,10 @@ app_license = "GPL-3.0-or-later"
 required_apps = ["erpnext"]
 
 app_logo_url = "/assets/commercial_erp/images/logo.svg"
-app_include_css = "/assets/commercial_erp/css/commercial_erp.css"
-app_include_js = "/assets/commercial_erp/js/commercial_erp.js"
-web_include_css = "/assets/commercial_erp/css/commercial_erp.css"
-web_include_js = "/assets/commercial_erp/js/login.js"
+app_include_css = "commercial_erp.bundle.css"
+app_include_js = "commercial_erp.bundle.js"
+web_include_css = "commercial_erp.bundle.css"
+web_include_js = "login.bundle.js"
 
 after_install = "commercial_erp.setup.install.after_install"
 

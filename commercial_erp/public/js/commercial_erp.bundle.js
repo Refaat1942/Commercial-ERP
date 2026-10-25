@@ -37,8 +37,10 @@
 	// Open the shop dashboard instead of the generic apps screen.
 	function goHome() {
 		if (!window.frappe || !frappe.boot || !frappe.set_route) return false;
-		if (/^\/desk\/?$/.test(window.location.pathname) && frappe.session.user !== "Guest") {
-			frappe.set_route("shop");
+		var path = window.location.pathname.replace(/\/$/, "");
+		if (frappe.session.user !== "Guest" && (path === "/desk" || path === "/desk/build")) {
+			// the generic apps screen and the developer "Build" page are not for shop users
+			frappe.set_route(path === "/desk" ? "shop" : "setup/home");
 		}
 		return true;
 	}
