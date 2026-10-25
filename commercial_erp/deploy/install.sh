@@ -126,6 +126,22 @@ fi
 [ -d "${BENCH_DIR}/apps/erpnext" ] || { log "ERPNext ${ERPNEXT_VERSION}"; "${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench get-app erpnext --branch ${ERPNEXT_VERSION} https://github.com/frappe/erpnext"; }
 [ -d "${BENCH_DIR}/apps/commercial_erp" ] || { log "commercial_erp from ${APP_REPO}"; "${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench get-app commercial_erp '${APP_REPO}' --branch '${APP_BRANCH}'"; }
 
+# ---- 5b. Private internal ports (uncommon, to avoid clashing with other services on the VPS) ----------
+REDIS_CACHE_PORT=16379; REDIS_QUEUE_PORT=16380; WEB_PORT=18000; SOCKETIO_PORT=19000
+for P in "$REDIS_CACHE_PORT" "$REDIS_QUEUE_PORT" "$WEB_PORT" "$SOCKETIO_PORT"; do
+	if ss -tlnH | grep -qE "[:.]${P}\s" && [ "$(redis-cli -p "$P" ping 2>/dev/null || true)" != "PONG" ] && ! supervisorctl status 2>/dev/null | grep -q RUNNING; then
+		die "internal port ${P} is used by another service; free it or edit the ports in install.sh"
+	fi
+done
+"${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench set-config -g redis_cache redis://127.0.0.1:${REDIS_CACHE_PORT} && bench set-config -g redis_queue redis://127.0.0.1:${REDIS_QUEUE_PORT} && bench set-config -g redis_socketio redis://127.0.0.1:${REDIS_QUEUE_PORT} && bench set-config -g webserver_port ${WEB_PORT} && bench set-config -g socketio_port ${SOCKETIO_PORT} && bench setup redis"
+if [ "$SITE_EXISTS" -eq 0 ]; then   # temporary Redis (localhost only) so new-site/wizard can run before supervisor takes over
+	for C in redis_queue redis_cache; do
+		"${RUN[@]}" bash -c "cd ${BENCH_DIR} && redis-server config/${C}.conf --daemonize yes >/dev/null"
+	done
+	sleep 2
+	[ "$(redis-cli -p "$REDIS_QUEUE_PORT" ping)" = "PONG" ] && [ "$(redis-cli -p "$REDIS_CACHE_PORT" ping)" = "PONG" ] || die "temporary Redis did not start"
+fi
+
 # ---- 6. Site + database (created by bench; passwords prompted, never stored) ---------------------
 if [ "$SITE_EXISTS" -eq 0 ]; then
 	log "Creating site ${SITE_NAME} and its database"
@@ -167,6 +183,10 @@ if [ -n "${COMPANY_NAME:-}" ] && [ -n "${COMPANY_ABBR:-}" ]; then
 else
 	log "COMPANY_NAME/COMPANY_ABBR not set: complete the setup wizard in the browser (Egypt / EGP / Arabic)."
 fi
+
+# stop the temporary Redis; supervisor runs the permanent ones on the same ports
+redis-cli -p "$REDIS_QUEUE_PORT" shutdown nosave 2>/dev/null || true; redis-cli -p "$REDIS_CACHE_PORT" shutdown nosave 2>/dev/null || true
+sleep 1
 
 # ---- 8. Processes + nginx on ${HTTP_PORT} (own, uniquely named config files) ----------------------------
 log "supervisor + nginx on port ${HTTP_PORT}"

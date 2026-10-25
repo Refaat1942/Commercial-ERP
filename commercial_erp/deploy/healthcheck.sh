@@ -4,7 +4,7 @@ PORT="${1:-15161}"; rc=0
 ok(){ echo "OK   $*"; }; bad(){ echo "FAIL $*"; rc=1; }
 code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "http://127.0.0.1:${PORT}/api/method/ping")
 [ "$code" = "200" ] && ok "HTTP ping on :$PORT" || bad "HTTP ping on :$PORT (got $code)"
-for p in 3306 6379 8000 9000 11000 12000 13000; do
+for p in 3306 6379 16379 16380 18000 19000; do
 	if ss -tlnH | awk '{print $4}' | grep -E "^(0\.0\.0\.0|\*|\[::\]):$p$" >/dev/null; then bad "port $p listens on ALL interfaces"; else ok "port $p not public"; fi
 done
 systemctl is-active --quiet mariadb && ok mariadb || bad mariadb
