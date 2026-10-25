@@ -180,6 +180,19 @@ SIDEBARS = {
 			],
 		),
 		(
+			"Advanced (administrator)",
+			[
+				("Customize Form", "DocType", "Customize Form", "sliders-horizontal"),
+				("Custom Field", "DocType", "Custom Field", "plus-square"),
+				("Reports List", "DocType", "Report", "list"),
+				("Notification", "DocType", "Notification", "bell"),
+				("Workflow", "DocType", "Workflow", "git-branch"),
+				("Error Log", "DocType", "Error Log", "bug"),
+				("Scheduled Job Log", "DocType", "Scheduled Job Log", "clock"),
+				("Global Search Settings", "DocType", "Global Search Settings", "search"),
+			],
+		),
+		(
 			"System Settings",
 			[
 				("System", "DocType", "System Settings", "settings"),

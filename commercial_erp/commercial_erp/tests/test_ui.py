@@ -62,3 +62,19 @@ class TestBrandingAndNavigation(IntegrationTestCase):
 		arrange.apply()
 		self.assertTrue(frappe.db.exists("Sidebar", "Shop"))
 		self.assertEqual(frappe.db.get_value("Workspace", "Shop", "module"), "Shop")
+
+	def test_framework_tools_are_hidden_from_the_rail(self):
+		from frappe.desk.doctype.dock.dock import get_site_dock
+
+		arrange.hide_framework_dock()
+		rows = get_site_dock("frappe")
+		self.assertTrue(rows)
+		self.assertTrue(all(r.get("hidden") for r in rows))
+
+	def test_global_search_is_limited_to_business_documents(self):
+		arrange.trim_global_search()
+		doctypes = {
+			r.document_type for r in frappe.get_single("Global Search Settings").allowed_in_global_search
+		}
+		self.assertIn("Sales Invoice", doctypes)
+		self.assertFalse(doctypes & {"Web Page", "Lead", "Work Order", "Project", "Country"})
