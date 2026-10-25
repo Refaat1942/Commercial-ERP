@@ -23,6 +23,12 @@ def run():
 	from commercial_erp.setup import simplify
 
 	simplify.apply()
+	from commercial_erp.setup import users
+
+	users.configure()
+	from commercial_erp.setup.print_formats import simplify_printing
+
+	simplify_printing()
 	frappe.db.commit()
 	frappe.clear_cache()
 	return "ok"

@@ -72,6 +72,26 @@ HIDE = {
 		"serial_nos_and_batches", "supplier_details", "foreign_trade_details", "grant_commission", "customer_details",
 		"section_break_xili",
 	],
+	"User": [
+		"middle_name", "send_welcome_email", "unsubscribed", "short_bio", "document_follow_notifications_section",
+		"email_settings", "thread_notify", "send_me_a_copy", "send_read_receipt", "allowed_in_mentions",
+		"email_signature", "user_emails", "third_party_authentication", "api_access", "sb2", "sb3",
+		"desk_settings_section", "workspace_section", "app_section", "code_editor_type", "navigation_settings_section",
+		"list_settings_section", "form_settings_section", "report_settings_section", "sessions_tab", "connections_tab",
+		"follow_created_documents", "follow_commented_documents", "follow_liked_documents", "follow_shared_documents",
+		"follow_assigned_documents", "column_break_75", "redirect_url", "mute_sounds",
+	],
+	"System Settings": [
+		"email_tab", "files_tab", "backups_tab", "advanced_tab", "ai_agents_tab", "app_tab", "updates_tab",
+		"two_factor_authentication", "login_methods_section", "background_workers", "permissions",
+		"setup_complete", "allow_error_traceback", "enable_onboarding", "use_number_format_from_currency",
+		"disable_document_sharing", "show_absolute_datetime_in_timeline",
+	],
+	"Print Settings": [
+		"send_print_as_pdf", "server_printer", "raw_printing_section", "pdf_page_height", "pdf_page_width",
+		"pdf_generator", "max_bulk_print_docs", "max_concurrent_bulk_exports", "add_draft_heading",
+		"allow_page_break_inside_tables", "allow_print_for_cancelled",
+	],
 }  # fmt: skip
 
 # required fields that the form/server fill in by themselves, so hiding them is safe

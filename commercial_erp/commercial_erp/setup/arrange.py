@@ -275,6 +275,9 @@ def after_migrate():
 	full_numbers()
 	fast_reports()
 	simplify_workspaces()
+	from commercial_erp.setup.print_formats import simplify_printing
+
+	simplify_printing()  # a migrate re-syncs the standard print formats
 
 
 # --- upstream content that does not belong in a branded product -------------------------------
@@ -310,6 +313,7 @@ def clean_navbar():
 		"User Forum",
 		"Report an Issue",
 		"Frappe School",
+		"System Health",
 	}
 	for table in ("help_dropdown", "settings_dropdown"):
 		rows = doc.get(table) or []
@@ -319,6 +323,7 @@ def clean_navbar():
 			if r.item_label not in drop_labels
 			and "frappe.io" not in (r.route or "")
 			and "clear_demo" not in (r.action or "")
+			and "system-health" not in (r.route or "")
 		]
 		if len(kept) != len(rows):
 			doc.set(table, kept)

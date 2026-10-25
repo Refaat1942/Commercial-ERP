@@ -16,6 +16,18 @@
 		});
 		box.appendChild(a);
 		document.body.appendChild(box);
+		// log in with a user name (no email in a shop setup); "Forgot password" would need email
+		var label = document.querySelector('label[for="login_email"]');
+		if (label) label.textContent = cur === "ar" ? "اسم المستخدم" : "User name";
+		var input = document.getElementById("login_email");
+		if (input) {
+			input.setAttribute("placeholder", cur === "ar" ? "مثال: Ahmed" : "e.g. Ahmed");
+			input.setAttribute("autocapitalize", "off");
+			input.setAttribute("autocorrect", "off");
+			input.setAttribute("spellcheck", "false");
+		}
+		var forgot = document.querySelector('a[href="#forgot"]');
+		if (forgot) forgot.style.display = "none";
 	}
 	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
 	else init();

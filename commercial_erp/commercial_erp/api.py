@@ -91,3 +91,13 @@ def health_check():
 	from commercial_erp.setup.audit import run
 
 	return run()
+
+
+def boot_session(bootinfo):
+	"""The "Framework" app (developer tools) is not offered on the apps screen or the app switcher, and
+	there is no outgoing email in a shop setup, so the desk never offers to send one."""
+	for app in bootinfo.get("app_data") or []:
+		if app.get("app_name") == "frappe":
+			app["on_apps_screen"] = False
+	if bootinfo.get("user"):
+		bootinfo.user.can_email = []
