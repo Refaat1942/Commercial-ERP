@@ -22,6 +22,7 @@ doc_events = {
 		"on_update": "commercial_erp.setup.company.on_company_update",
 	},
 	"User": {
+		"before_insert": "commercial_erp.setup.users.before_user_insert",
 		"after_insert": "commercial_erp.setup.arrange.on_user_created",
 		"on_update": "commercial_erp.setup.simplify.on_user_update",
 	},
@@ -32,3 +33,5 @@ after_migrate = "commercial_erp.setup.update.after_migrate"
 scheduler_events = {"hourly": ["commercial_erp.api.expire_demo_links"]}
 
 before_request = ["commercial_erp.api.check_demo_session"]
+before_login = ["commercial_erp.setup.users.before_login"]
+boot_session = "commercial_erp.api.boot_session"

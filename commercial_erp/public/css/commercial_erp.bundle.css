@@ -260,3 +260,5 @@ body:has(.dock-item.active[aria-label="Shop"]){--ce-module:#0B6B63}
 .form-sidebar .form-tags,.form-sidebar .form-shared,.form-sidebar .form-assignments,.form-sidebar .pageview-count,
 .form-sidebar .sidebar-rating{display:none!important}
 .form-sidebar .sidebar-image-section .sidebar-image-wrapper{display:none}
+/* no email in a shop setup: the print preview's mail icon */
+.page-head .icon-btn:has(use[href="#icon-mail"]){display:none!important}
