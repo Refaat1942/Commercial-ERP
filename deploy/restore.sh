@@ -4,7 +4,7 @@
 set -euo pipefail
 TARGET="${1:?target site name (must not exist)}"; SQL="${2:?sql.gz path}"
 PUB="${3:-}"; PRIV="${4:-}"
-BENCH_DIR="${BENCH_DIR:-/home/frappe/frappe-bench}"
+BENCH_DIR="${BENCH_DIR:-/home/fes/fes-bench}"
 export PATH="/opt/node24/bin:$HOME/.local/bin:$PATH"
 cd "$BENCH_DIR"
 [ -e "sites/$TARGET" ] && { echo "Refusing: site $TARGET already exists. Restoring over an existing site must be done manually after a fresh backup."; exit 1; }

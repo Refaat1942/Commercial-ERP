@@ -10,4 +10,4 @@ echo "== Existing versions"; mariadb --version 2>/dev/null || mysql --version 2>
 nginx -v 2>&1 | head -1 || true; redis-server --version 2>/dev/null || echo "no redis"; python3 --version; node --version 2>/dev/null || echo "no node"
 echo "== Firewall"; ufw status 2>/dev/null | head -5 || echo "ufw not installed"
 echo "== SSH port"; sshd -T 2>/dev/null | grep -i '^port ' || grep -i '^Port' /etc/ssh/sshd_config || echo 22
-echo "== Existing bench/sites"; ls -d /home/*/frappe-bench 2>/dev/null || echo "none"
+echo "== Existing bench/sites"; ls -d /home/*/fes-bench 2>/dev/null || echo "none"

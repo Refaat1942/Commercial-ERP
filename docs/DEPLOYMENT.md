@@ -29,29 +29,29 @@ The deployable app lives on branch **`deployment-ready`** of `Refaat1942/Commerc
 Access to the private repo uses a **read-only deploy key** created on the VPS (no personal tokens):
 ```bash
 sudo apt-get update && sudo apt-get install -y git openssh-client
-sudo id frappe >/dev/null 2>&1 || sudo useradd -m -s /bin/bash frappe
-sudo -u frappe mkdir -p -m 700 /home/frappe/.ssh
-sudo -u frappe test -f /home/frappe/.ssh/deploy_key || sudo -u frappe ssh-keygen -t ed25519 -N "" -C commercial-erp-deploy -f /home/frappe/.ssh/deploy_key
-sudo cat /home/frappe/.ssh/deploy_key.pub     # add as a Deploy key (leave "Allow write" UNchecked): repo -> Settings -> Deploy keys
+sudo id fes >/dev/null 2>&1 || sudo useradd -m -s /bin/bash fes
+sudo -u fes mkdir -p -m 700 /home/fes/.ssh
+sudo -u fes test -f /home/fes/.ssh/deploy_key || sudo -u fes ssh-keygen -t ed25519 -N "" -C commercial-erp-deploy -f /home/fes/.ssh/deploy_key
+sudo cat /home/fes/.ssh/deploy_key.pub     # add as a Deploy key (leave "Allow write" UNchecked): repo -> Settings -> Deploy keys
 ```
 Then fetch the installer and run it (port **15161**):
 ```bash
-sudo -u frappe GIT_SSH_COMMAND="ssh -i /home/frappe/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new" \
-  git clone --branch deployment-ready --single-branch git@github.com:Refaat1942/Commercial-ERP.git /home/frappe/commercial_erp_src
-sudo bash /home/frappe/commercial_erp_src/deploy/vps_discovery.sh                         # read-only look first
+sudo -u fes GIT_SSH_COMMAND="ssh -i /home/fes/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new" \
+  git clone --branch deployment-ready --single-branch git@github.com:Refaat1942/Commercial-ERP.git /home/fes/commercial_erp_src
+sudo bash /home/fes/commercial_erp_src/deploy/vps_discovery.sh                         # read-only look first
 sudo AUTO_PASSWORDS=1 APP_BRANCH=deployment-ready SITE_NAME=erp.local COMPANY_NAME="اسم المحل" COMPANY_ABBR=SH \
-  bash /home/frappe/commercial_erp_src/deploy/install.sh
+  bash /home/fes/commercial_erp_src/deploy/install.sh
 ```
 - `StrictHostKeyChecking=accept-new` trusts GitHub's key on first contact; compare with https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints if you want to be strict.
 - Prompts (hidden) for the MariaDB root password (a **new** one on a fresh server; the existing one if MariaDB is already installed) and the ERP Administrator password (both >= 12 chars). Nothing is stored in Git or history.
-- Creates user `frappe`, pinned Frappe/ERPNext, the site and **its database through `bench new-site`**, Arabic/Egypt setup, supervisor + nginx on **15161** (own files `commercial-erp.conf`), and a daily 02:30 backup.
+- Creates user `fes`, pinned Frappe/ERPNext, the site and **its database through `bench new-site`**, Arabic/Egypt setup, supervisor + nginx on **15161** (own files `commercial-erp.conf`), and a daily 02:30 backup.
 - Safety: refuses if Ubuntu is not 22.04/24.04, RAM < 4 GB, port 15161 is taken, existing MariaDB < 11.8 or listening publicly. An existing MariaDB/nginx/sshd config is never edited; an existing site is never touched; the firewall is never enabled automatically (it prints the exact `ufw` commands - allow SSH first). Re-running is safe.
 - `SITE_NAME` is only a label until you have a domain; nginx on 15161 answers any Host.
 - If the Hostinger panel firewall is on, allow TCP 15161 and SSH there too.
 
 ## 4. Verify
 ```bash
-bash /home/frappe/commercial_erp_src/deploy/healthcheck.sh 15161
+bash /home/fes/commercial_erp_src/deploy/healthcheck.sh 15161
 curl -i http://<server-ip>:15161/api/method/ping
 ```
 Log in as `Administrator`; create users with Role Profiles `Shop Owner`, `Cashier`, `Storekeeper`, `Accountant`.
@@ -67,15 +67,15 @@ Log in as `Administrator`; create users with Role Profiles `Shop Owner`, `Cashie
 
 ## 7. Domain + HTTPS (later; requires a real domain)
 1. Point an `A` record (e.g. `erp.example.com`) to the VPS IP; wait for DNS.
-2. `sudo -u frappe bench rename-site erp.local erp.example.com` (take a backup first) and `bench setup nginx --yes`.
+2. `sudo -u fes bench rename-site erp.local erp.example.com` (take a backup first) and `bench setup nginx --yes`.
 3. Open ports 80/443 in UFW and the Hostinger panel, then `sudo bench setup lets-encrypt erp.example.com` (needs port 80 reachable). Keep or close 15161 afterwards.
 Nothing here is configured or claimed as secure until you complete this with a real domain.
 
 ## 8. Upgrade
 ```bash
-sudo -u frappe bash -c 'cd ~/frappe-bench && bench --site SITE backup --with-files'   # always first
+sudo -u fes bash -c 'cd ~/fes-bench && bench --site SITE backup --with-files'   # always first
 # bump pins in deploy/versions.env, test on a restored copy, then:
-sudo -u frappe bash -c 'cd ~/frappe-bench && bench update --pull'   # or: git checkout new tag in each app, bench migrate, bench build
+sudo -u fes bash -c 'cd ~/fes-bench && bench update --pull'   # or: git checkout new tag in each app, bench migrate, bench build
 ```
 Upgrade the app only: `cd apps/commercial_erp && git pull && cd ../.. && bench --site SITE migrate && sudo supervisorctl restart all`.
 
@@ -83,7 +83,7 @@ Upgrade the app only: `cd apps/commercial_erp && git pull && cd ../.. && bench -
 1. Take a backup **before** every change (`commercial-erp-backup`).
 2. App-only problem: `cd apps/commercial_erp && git checkout <previous-tag> && bench --site SITE migrate && sudo supervisorctl restart all`.
 3. Data problem: restore the pre-change backup into a **new** site (`deploy/restore.sh`), check it, then switch (rename sites) - never restore over the live site without a fresh backup of it.
-4. Failed first install: nothing existing was modified; remove `/home/frappe/frappe-bench` and `/etc/nginx/conf.d/frappe-bench.conf`, `/etc/supervisor/conf.d/frappe-bench.conf`, then re-run. (Dropping the site DB is destructive: `bench drop-site` needs your explicit decision.)
+4. Failed first install: nothing existing was modified; remove `/home/fes/fes-bench` and `/etc/nginx/conf.d/fes-bench.conf`, `/etc/supervisor/conf.d/fes-bench.conf`, then re-run. (Dropping the site DB is destructive: `bench drop-site` needs your explicit decision.)
 
 ## Non-interactive passwords
 `AUTO_PASSWORDS=1` generates strong random passwords on the server, saves them to `/root/commercial-erp-credentials.txt` (mode 600) and never prints them. Read with `sudo cat /root/commercial-erp-credentials.txt`, store them in a password manager, then delete the file. Fresh MariaDB only.
