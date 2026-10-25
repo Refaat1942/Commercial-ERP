@@ -107,10 +107,23 @@ fi
 # ---- 6. Site + database (created by bench; passwords prompted, never stored) ---------------------
 if [ "$SITE_EXISTS" -eq 0 ]; then
 	log "Creating site ${SITE_NAME} and its database"
-	read -rsp "MariaDB root password (input hidden; $( [ "$MARIADB_PREEXISTING" -eq 1 ] && echo 'EXISTING root password' || echo 'choose a NEW strong one - it will be set now')): " DBROOT; echo
-	[ ${#DBROOT} -ge 12 ] || die "MariaDB root password must be at least 12 characters"
-	read -rsp "ERP Administrator password, min 12 chars (input hidden): " ADMINPW; echo
-	[ ${#ADMINPW} -ge 12 ] || die "Administrator password must be at least 12 characters"
+	if [ "${AUTO_PASSWORDS:-0}" = "1" ]; then
+		# Generated on this server only; saved to a root-only file, never printed or committed.
+		[ "$MARIADB_PREEXISTING" -eq 0 ] || die "AUTO_PASSWORDS needs a fresh MariaDB; with an existing one, run without AUTO_PASSWORDS and type its root password"
+		CREDS_FILE=/root/commercial-erp-credentials.txt
+		if [ -e "$CREDS_FILE" ]; then   # re-run after a partial install: reuse what was generated
+			ADMINPW="$(sed -n 's/^ERP Administrator password: //p' "$CREDS_FILE")"; DBROOT="$(sed -n 's/^MariaDB root password: //p' "$CREDS_FILE")"
+		else
+			DBROOT="$(openssl rand -hex 16)"; ADMINPW="$(openssl rand -hex 12)"
+			( umask 077; printf 'ERP site: %s\nERP Administrator password: %s\nMariaDB root password: %s\n' "$SITE_NAME" "$ADMINPW" "$DBROOT" >"$CREDS_FILE" )
+		fi
+		log "Generated passwords saved to $CREDS_FILE (root only). Read with: sudo cat $CREDS_FILE"
+	else
+		read -rsp "MariaDB root password (input hidden; $( [ "$MARIADB_PREEXISTING" -eq 1 ] && echo 'EXISTING root password' || echo 'choose a NEW strong one - it will be set now')): " DBROOT; echo
+		[ ${#DBROOT} -ge 12 ] || die "MariaDB root password must be at least 12 characters"
+		read -rsp "ERP Administrator password, min 12 chars (input hidden): " ADMINPW; echo
+		[ ${#ADMINPW} -ge 12 ] || die "Administrator password must be at least 12 characters"
+	fi
 	case "$DBROOT$ADMINPW" in *\'*|*\\*) die "passwords must not contain ' or \\";; esac
 	if [ "$MARIADB_PREEXISTING" -eq 0 ]; then
 		# fresh install: root is socket-auth only; add a password login for bench (socket login kept)

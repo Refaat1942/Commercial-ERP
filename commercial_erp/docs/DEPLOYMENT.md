@@ -39,7 +39,7 @@ Then fetch the installer and run it (port **15161**):
 sudo -u frappe GIT_SSH_COMMAND="ssh -i /home/frappe/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new" \
   git clone --branch deployment-ready --single-branch git@github.com:Refaat1942/Commercial-ERP.git /home/frappe/commercial_erp_src
 sudo bash /home/frappe/commercial_erp_src/deploy/vps_discovery.sh                         # read-only look first
-sudo APP_BRANCH=deployment-ready SITE_NAME=erp.local COMPANY_NAME="اسم المحل" COMPANY_ABBR=SH \
+sudo AUTO_PASSWORDS=1 APP_BRANCH=deployment-ready SITE_NAME=erp.local COMPANY_NAME="اسم المحل" COMPANY_ABBR=SH \
   bash /home/frappe/commercial_erp_src/deploy/install.sh
 ```
 - `StrictHostKeyChecking=accept-new` trusts GitHub's key on first contact; compare with https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints if you want to be strict.
@@ -84,3 +84,6 @@ Upgrade the app only: `cd apps/commercial_erp && git pull && cd ../.. && bench -
 2. App-only problem: `cd apps/commercial_erp && git checkout <previous-tag> && bench --site SITE migrate && sudo supervisorctl restart all`.
 3. Data problem: restore the pre-change backup into a **new** site (`deploy/restore.sh`), check it, then switch (rename sites) - never restore over the live site without a fresh backup of it.
 4. Failed first install: nothing existing was modified; remove `/home/frappe/frappe-bench` and `/etc/nginx/conf.d/frappe-bench.conf`, `/etc/supervisor/conf.d/frappe-bench.conf`, then re-run. (Dropping the site DB is destructive: `bench drop-site` needs your explicit decision.)
+
+## Non-interactive passwords
+`AUTO_PASSWORDS=1` generates strong random passwords on the server, saves them to `/root/commercial-erp-credentials.txt` (mode 600) and never prints them. Read with `sudo cat /root/commercial-erp-credentials.txt`, store them in a password manager, then delete the file. Fresh MariaDB only.
