@@ -7,6 +7,9 @@
 @font-face{font-family:"Cairo";font-weight:600;font-display:swap;src:url(/assets/commercial_erp/fonts/cairo-latin-600-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:"Cairo";font-weight:700;font-display:swap;src:url(/assets/commercial_erp/fonts/cairo-latin-700-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 
+@font-face{font-family:"Cairo";font-weight:500;font-display:swap;src:url(/assets/commercial_erp/fonts/cairo-arabic-500-normal.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Cairo";font-weight:500;font-display:swap;src:url(/assets/commercial_erp/fonts/cairo-latin-500-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
 :root{
 	--ce-primary:#0B6B63;
 	--ce-primary-dark:#084F49;
@@ -121,9 +124,25 @@ body:has(#page-login)::after{
 	content:"FES ERP";position:fixed;bottom:18px;left:0;right:0;text-align:center;color:rgba(255,255,255,.75);
 	font-size:13px;letter-spacing:.6px;pointer-events:none;
 }
-html[lang="ar"] body:has(#page-login)::after{content:"FES ERP — نظام إدارة المحلات والمخازن والتجارة"}
-html[lang="en"] body:has(#page-login)::after{content:"FES ERP — Shop, warehouse & trade management"}
+html[lang="ar"] body:has(#page-login)::after{content:"FES ERP — نظام إدارة المحلات والمخازن والتجارة  ·  Fratelanza © 2026"}
+html[lang="en"] body:has(#page-login)::after{content:"FES ERP — Shop, warehouse & trade management  ·  Fratelanza © 2026"}
 #ce-login-lang{position:fixed;top:18px;inset-inline-end:22px;z-index:5}
 #ce-login-lang a{display:inline-block;background:rgba(255,255,255,.14);color:#fff!important;border:1px solid rgba(255,255,255,.3);
 	padding:6px 14px;border-radius:999px;font-weight:600;font-size:13px;text-decoration:none;backdrop-filter:blur(4px)}
 #ce-login-lang a:hover{background:rgba(255,255,255,.26)}
+
+/* ---- readability: darker text, medium weight, slightly larger base size ---- */
+:root{
+	--text-color:#16231F;--heading-color:#0E1B18;--text-muted:#3F524E;--text-light:#4D605C;
+	--ink-gray-9:#0E1B18;--ink-gray-8:#16231F;--ink-gray-7:#22332F;--ink-gray-6:#33443F;--ink-gray-5:#44564F;
+}
+body{font-size:14.5px;font-weight:500;color:var(--text-color)}
+.control-label,.form-group>.control-label,label,.form-section .section-head,.sidebar-item-label,.standard-sidebar-label,
+.dock-item-label,.widget-title,.number-label,.list-row-col,.page-title .title-text,.dt-cell__content{font-weight:600!important;color:var(--text-color)}
+.text-muted,.help-box,.small.text-muted,.page-card-subtitle{color:#3F524E!important}
+.sidebar-item-label,.standard-sidebar-label{font-size:14px}
+.widget .widget-title{font-size:14px}
+.number-widget-box .number{font-weight:700}
+.form-control,input.input-with-feedback,.input-sm{font-weight:500;color:#0E1B18}
+::placeholder{color:#6A7C77!important;opacity:1}
+.dock-item .dock-item-icon svg{stroke-width:1.9}

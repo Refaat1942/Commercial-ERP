@@ -60,7 +60,7 @@ class TestEgyptCompany(IntegrationTestCase):
 				}
 			).insert()
 
-	def test_vat_accounts_and_zero_rate_templates(self):
+	def test_vat_accounts_and_optional_14_percent_templates(self):
 		for name in (VAT_OUTPUT, VAT_INPUT):
 			self.assertTrue(frappe.db.exists("Account", {"company": "_Test Egypt Co", "account_name": name}))
 		for dt, title in (
@@ -68,7 +68,8 @@ class TestEgyptCompany(IntegrationTestCase):
 			("Purchase Taxes and Charges Template", PURCHASE_TEMPLATE),
 		):
 			tpl = frappe.get_doc(dt, {"title": title, "company": "_Test Egypt Co"})
-			self.assertEqual([t.rate for t in tpl.taxes], [0])
+			self.assertEqual([t.rate for t in tpl.taxes], [14])
+			self.assertFalse(tpl.is_default)  # VAT stays optional
 
 	def test_setup_is_idempotent(self):
 		before = frappe.db.count("Account", {"company": "_Test Egypt Co"})

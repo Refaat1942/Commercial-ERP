@@ -20,6 +20,10 @@ sudo cat /root/commercial-erp-demo-credentials.txt      # password + the 4 demo 
 The demo owner is **not** a System Manager, so a shared demo login cannot change system settings. Reset the demo data any time:
 `bench --site demo.local execute commercial_erp.setup.demo.clear` then `...demo.seed`.
 
+## C. Time-limited demo link, created inside the program
+On the **demo site only** (never on a real site; the system refuses): *Setup -> Demo Links -> New*.
+Enter the customer's name, choose the demo role (owner / cashier / storekeeper / accountant) and for how many hours it should work (1-720). Save: the **Demo Link** field now holds a one-click URL. Send it; the customer lands on the shop dashboard already signed in. When the time runs out (checked on every request and hourly) the temporary user is disabled and signed out; *Revoke Now* stops it earlier. One-time setup of the demo site flag is done by `create_demo_site.sh` (`bench --site demo.local set-config allow_demo_links 1`).
+
 ## Links to hand to a customer (replace `<ip>`; demo site port 15162)
 | Role | Login | Start here |
 |---|---|---|

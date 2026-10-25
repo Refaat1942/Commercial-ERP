@@ -3,6 +3,9 @@
 import frappe
 
 BRAND = "FES ERP"
+OWNER = "Fratelanza"
+YEAR = "2026"
+CREDIT = f"{OWNER} © {YEAR}"
 LOGO = "/assets/commercial_erp/images/logo.svg"
 
 
@@ -14,8 +17,8 @@ def apply():
 		"splash_image": LOGO,
 		"footer_logo": LOGO,
 		"hide_footer_signup": 1,
-		"footer_powered": "",
-		"copyright": BRAND,
+		"footer_powered": BRAND,
+		"copyright": CREDIT,
 		"title_prefix": BRAND,
 	}
 	meta = frappe.get_meta("Website Settings")
@@ -29,8 +32,8 @@ def apply():
 	if meta.has_field("disable_standard_email_footer"):
 		frappe.db.set_single_value("System Settings", "disable_standard_email_footer", 1)
 	if meta.has_field("email_footer_address"):
-		frappe.db.set_single_value("System Settings", "email_footer_address", BRAND)
+		frappe.db.set_single_value("System Settings", "email_footer_address", f"{BRAND} — {CREDIT}")
 	# the e-mail code reads these two from Defaults, not from System Settings
 	frappe.db.set_default("disable_standard_email_footer", 1)
-	frappe.db.set_default("email_footer_address", BRAND)
+	frappe.db.set_default("email_footer_address", f"{BRAND} — {CREDIT}")
 	frappe.clear_cache()

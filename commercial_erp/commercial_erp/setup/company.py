@@ -1,7 +1,8 @@
 """Egypt-specific additions applied after ERPNext creates a company's chart of accounts.
 
-Tax rates are deliberately NOT hardcoded: the templates are created with a 0 rate and must be
-configured by the owner/accountant against current Egyptian regulations before use.
+VAT is OPTIONAL per document: the 14% templates are never set as default, so an invoice carries no tax
+unless the user picks the template. 14% is Egypt's general VAT rate; table tax, exemptions, reduced rates
+and any rate change must be confirmed by the company's accountant / the Egyptian Tax Authority.
 """
 
 import frappe
@@ -9,8 +10,13 @@ from frappe import _
 
 VAT_OUTPUT = "ضريبة القيمة المضافة - مبيعات"
 VAT_INPUT = "ضريبة القيمة المضافة - مشتريات"
-SALES_TEMPLATE = "ضريبة القيمة المضافة - مبيعات (حدد النسبة)"
-PURCHASE_TEMPLATE = "ضريبة القيمة المضافة - مشتريات (حدد النسبة)"
+VAT_RATE = 14
+SALES_TEMPLATE = "ضريبة القيمة المضافة 14% - مبيعات"
+PURCHASE_TEMPLATE = "ضريبة القيمة المضافة 14% - مشتريات"
+LEGACY_ZERO_RATE_TEMPLATES = (
+	("Sales Taxes and Charges Template", "ضريبة القيمة المضافة - مبيعات (حدد النسبة)"),
+	("Purchase Taxes and Charges Template", "ضريبة القيمة المضافة - مشتريات (حدد النسبة)"),
+)
 
 
 def on_company_update(doc, method=None):
@@ -30,7 +36,16 @@ def setup_egypt_company(company):
 	input_ = _ensure_account(company, parent, VAT_INPUT)
 	_ensure_template("Sales Taxes and Charges Template", SALES_TEMPLATE, company, output, "Add")
 	_ensure_template("Purchase Taxes and Charges Template", PURCHASE_TEMPLATE, company, input_, "Add")
+	_retire_zero_rate_templates(company)
 	disable_unverified_default_taxes(company)
+
+
+def _retire_zero_rate_templates(company):
+	"""Earlier versions created 0% placeholders; hide them (they are replaced by the 14% ones)."""
+	for doctype, title in LEGACY_ZERO_RATE_TEMPLATES:
+		name = frappe.db.get_value(doctype, {"title": title, "company": company})
+		if name:
+			frappe.db.set_value(doctype, name, {"disabled": 1, "is_default": 0})
 
 
 def disable_unverified_default_taxes(company):
@@ -75,7 +90,7 @@ def _ensure_account(company, parent, account_name):
 
 def _ensure_template(doctype, title, company, account_head, add_deduct):
 	if frappe.db.exists(doctype, {"title": title, "company": company}):
-		return
+		return  # never overwrite: the accountant may have changed it
 	frappe.get_doc(
 		{
 			"doctype": doctype,
@@ -87,8 +102,8 @@ def _ensure_template(doctype, title, company, account_head, add_deduct):
 					"add_deduct_tax": add_deduct,
 					"charge_type": "On Net Total",
 					"account_head": account_head,
-					"description": _("VAT - set the rate before use"),
-					"rate": 0,
+					"description": _("VAT 14%"),
+					"rate": VAT_RATE,
 				}
 			],
 		}

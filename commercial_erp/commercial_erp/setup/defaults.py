@@ -44,6 +44,7 @@ def apply_system_defaults():
 		frappe.db.set_value("Language", "ar", "enabled", 1)
 	if frappe.db.exists("Language", "en"):
 		frappe.db.set_value("Language", "en", "enabled", 1)
+	_egp_only()
 	if frappe.db.exists("Currency", "EGP"):
 		frappe.db.set_value(
 			"Currency",
@@ -79,3 +80,14 @@ def enable_audit_trail():
 				},
 				validate_fields_for_doctype=False,
 			)
+
+
+def _egp_only():
+	"""Everything in Egyptian pounds: other currencies are disabled (re-enable one in Currency if you really need it)
+	and the standard price lists are switched to EGP."""
+	if not frappe.db.exists("Currency", "EGP"):
+		return
+	frappe.db.sql("update `tabCurrency` set enabled = 0 where name != 'EGP'")
+	for name in frappe.get_all("Price List", pluck="name"):
+		if frappe.db.get_value("Price List", name, "currency") != "EGP":
+			frappe.db.set_value("Price List", name, "currency", "EGP")

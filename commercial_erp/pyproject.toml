@@ -1,6 +1,6 @@
 [project]
 name = "commercial_erp"
-authors = [{ name = "Commercial ERP", email = "admin@example.com" }]
+authors = [{ name = "Fratelanza" }]
 description = "Arabic-first commercial ERP configuration for small Egyptian shops and warehouses, on top of ERPNext v16"
 requires-python = ">=3.14"
 readme = "README.md"

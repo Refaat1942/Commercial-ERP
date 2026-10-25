@@ -27,7 +27,7 @@ log "creating ${DEMO_SITE}"
 	|| { shred -u "$CRED"; die "new-site failed"; }
 shred -u "$CRED"; unset DBROOT ADMINPW
 log "company, Arabic/Egypt defaults, UI, fake data, demo logins"
-"${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench --site '${DEMO_SITE}' execute commercial_erp.setup.wizard.run --kwargs '{\"company_name\": \"شركة العرض التجريبي\", \"company_abbr\": \"DM\"}' && bench --site '${DEMO_SITE}' execute commercial_erp.setup.update.run && bench --site '${DEMO_SITE}' execute commercial_erp.setup.demo.seed && bench --site '${DEMO_SITE}' execute commercial_erp.setup.demo.create_users --kwargs '{\"password\": \"${DEMOPW}\"}' && bench --site '${DEMO_SITE}' enable-scheduler"
+"${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench --site '${DEMO_SITE}' execute commercial_erp.setup.wizard.run --kwargs '{\"company_name\": \"شركة العرض التجريبي\", \"company_abbr\": \"DM\"}' && bench --site '${DEMO_SITE}' execute commercial_erp.setup.update.run && bench --site '${DEMO_SITE}' execute commercial_erp.setup.demo.seed && bench --site '${DEMO_SITE}' execute commercial_erp.setup.demo.create_users --kwargs '{\"password\": \"${DEMOPW}\"}' && bench --site '${DEMO_SITE}' enable-scheduler && bench --site '${DEMO_SITE}' set-config allow_demo_links 1"
 
 log "nginx: ${DEMO_SITE} on port ${DEMO_PORT} (main site stays on ${HTTP_PORT})"
 cp -a "${BENCH_DIR}/config/nginx.conf" "${BENCH_DIR}/config/nginx.conf.before-demo"

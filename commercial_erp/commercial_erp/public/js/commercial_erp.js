@@ -22,6 +22,18 @@
 		});
 		host.prepend(btn);
 	}
+	// Translate dock tooltips/labels that upstream leaves in English (Assets, Setup, ...).
+	function translateDock() {
+		if (!window.__) return;
+		document.querySelectorAll(".dock-item-label, .es-tooltip").forEach(function (el) {
+			var src = el.getAttribute("data-ce-src") || el.textContent.trim();
+			if (!src) return;
+			el.setAttribute("data-ce-src", src);
+			var t = __(src);
+			if (t && t !== el.textContent) el.textContent = t;
+		});
+	}
+	new MutationObserver(translateDock).observe(document.documentElement, { childList: true, subtree: true });
 	var tries = 0;
 	var timer = setInterval(function () {
 		install();
