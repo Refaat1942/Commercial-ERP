@@ -25,7 +25,9 @@ die(){ printf '\033[1;31mERROR: %s\033[0m\n' "$*" >&2; exit 1; }
 case "${VERSION_ID}" in 22.04|24.04) ;; *) die "Ubuntu 22.04/24.04 required (found ${PRETTY_NAME})";; esac
 [ "$(awk '/MemTotal/{print int($2/1024)}' /proc/meminfo)" -ge 3500 ] || die "need >= 4 GB RAM (add swap otherwise)"
 if [ ! -d "${BENCH_DIR}" ] && ss -tlnH | grep -qE "[:.]${HTTP_PORT}\s"; then die "port ${HTTP_PORT} is already used by another service"; fi
-SITE_EXISTS=0; [ -d "${BENCH_DIR}/sites/${SITE_NAME}" ] && { SITE_EXISTS=1; log "Site ${SITE_NAME} already exists - it will not be touched"; }
+SITE_EXISTS=0
+if [ -f "${BENCH_DIR}/sites/${SITE_NAME}/site_config.json" ]; then SITE_EXISTS=1; log "Site ${SITE_NAME} already exists - it will not be touched"
+elif [ -d "${BENCH_DIR}/sites/${SITE_NAME}" ]; then log "Removing half-created site directory from a failed attempt (no site_config.json)"; rm -rf "${BENCH_DIR}/sites/${SITE_NAME}"; fi
 MARIADB_MARKER=/etc/mysql/.commercial-erp-installed   # written by this script after it installs MariaDB
 MARIADB_PREEXISTING=0; if command -v mariadb >/dev/null && [ ! -e "$MARIADB_MARKER" ]; then MARIADB_PREEXISTING=1; fi
 
@@ -153,6 +155,8 @@ if [ "$SITE_EXISTS" -eq 0 ]; then
 	CRED="$(mktemp)"; chmod 600 "$CRED"
 	printf 'DBROOT=%q\nADMINPW=%q\n' "$DBROOT" "$ADMINPW" >"$CRED"
 	chown "${BENCH_USER}" "$CRED"   # after writing: /tmp refuses root writes into files owned by others
+	# Connect over the local unix socket: with skip-name-resolve a TCP 127.0.0.1 login would not match root@localhost
+	"${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench set-config -g db_host localhost"
 	"${RUN[@]}" bash -c ". '$CRED'; cd ${BENCH_DIR} && bench new-site '${SITE_NAME}' --mariadb-root-username root --mariadb-root-password \"\$DBROOT\" --admin-password \"\$ADMINPW\" --install-app erpnext --install-app commercial_erp --set-default" \
 		|| { shred -u "$CRED"; die "bench new-site failed; nothing pre-existing was modified"; }
 	shred -u "$CRED"; unset DBROOT ADMINPW
