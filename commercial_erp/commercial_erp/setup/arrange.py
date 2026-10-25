@@ -172,6 +172,9 @@ def _reset_layers():
 	frappe.clear_cache()
 
 
+CHART_COLORS = ["#0B6B63", "#D9A33A", "#2F6FDE", "#7B4FC9", "#E08A2E", "#1E9E5F", "#C8473A"]
+
+
 def full_numbers():
 	"""Show real accounting numbers (64,880.00), never "64.88K"/"ك": number cards in full, charts without
 	shortened axes."""
@@ -182,8 +185,14 @@ def full_numbers():
 		except ValueError:
 			opts = {}
 		axis = opts.setdefault("axisOptions", {})
+		changed = False
 		if axis.get("shortenYAxisNumbers") != 0:
 			axis["shortenYAxisNumbers"] = 0
+			changed = True
+		if opts.get("colors") != CHART_COLORS:
+			opts["colors"] = CHART_COLORS
+			changed = True
+		if changed:
 			frappe.db.set_value(
 				"Dashboard Chart", name, "custom_options", json.dumps(opts), update_modified=False
 			)

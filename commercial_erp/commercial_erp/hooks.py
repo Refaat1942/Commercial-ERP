@@ -23,6 +23,7 @@ doc_events = {
 	},
 	"User": {
 		"after_insert": "commercial_erp.setup.arrange.on_user_created",
+		"on_update": "commercial_erp.setup.simplify.on_user_update",
 	},
 }
 

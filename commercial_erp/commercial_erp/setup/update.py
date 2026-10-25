@@ -20,6 +20,9 @@ def run():
 	for company in frappe.get_all("Company", filters={"country": "Egypt"}, pluck="name"):
 		setup_egypt_company(company)
 	arrange.apply()
+	from commercial_erp.setup import simplify
+
+	simplify.apply()
 	frappe.db.commit()
 	frappe.clear_cache()
 	return "ok"

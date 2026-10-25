@@ -489,3 +489,5 @@ Company currency is the Egyptian pound,عملة الشركة الجنيه الم
 Company currency is {0},عملة الشركة {0},
 All invoices are in Egyptian pounds,كل الفواتير بالجنيه المصري,
 {0} invoices are not in EGP,{0} فواتير ليست بالجنيه,
+ID,الرقم,
+Created On,تاريخ الإنشاء,
