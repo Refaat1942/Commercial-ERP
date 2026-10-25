@@ -190,7 +190,7 @@ sleep 1
 
 # ---- 8. Processes + nginx on ${HTTP_PORT} (own, uniquely named config files) ----------------------------
 log "supervisor + nginx on port ${HTTP_PORT}"
-"${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench set-nginx-port '${SITE_NAME}' ${HTTP_PORT} && bench --site '${SITE_NAME}' enable-scheduler && bench setup supervisor --yes && bench setup nginx --yes"
+"${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench set-nginx-port '${SITE_NAME}' ${HTTP_PORT} && bench --site '${SITE_NAME}' enable-scheduler && bench setup supervisor --yes --skip-supervisord && bench setup nginx --yes"
 ln -sfn "${BENCH_DIR}/config/supervisor.conf" /etc/supervisor/conf.d/commercial-erp.conf
 ln -sfn "${BENCH_DIR}/config/nginx.conf" /etc/nginx/conf.d/commercial-erp.conf
 systemctl enable --now supervisor nginx >/dev/null 2>&1 || true
