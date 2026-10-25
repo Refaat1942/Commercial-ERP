@@ -100,17 +100,27 @@ fi
 [ -x /opt/uv-venv/bin/uv ] || { python3 -m venv /opt/uv-venv && /opt/uv-venv/bin/pip install -q "uv==${UV_VERSION}"; }
 id "${BENCH_USER}" >/dev/null 2>&1 || useradd -m -s /bin/bash "${BENCH_USER}"
 chmod o+x "/home/${BENCH_USER}"   # nginx must traverse the home dir to serve /assets (no read of its contents)
-RUN=(sudo -H -u "${BENCH_USER}" env "PATH=/opt/node24/bin:/opt/uv-venv/bin:/home/${BENCH_USER}/.local/bin:/usr/local/bin:/usr/bin:/bin")
+# bench tries "sudo supervisorctl restart" after init/get-app, which prompts for a password the
+# bench user does not have. A shim answering "not found" (exit 127) makes bench skip that restart.
+install -d -m 755 /opt/commercial-erp-shims
+printf '#!/bin/sh\nexit 127\n' >/opt/commercial-erp-shims/supervisorctl; chmod 755 /opt/commercial-erp-shims/supervisorctl
+RUN=(sudo -H -u "${BENCH_USER}" env "PATH=/opt/commercial-erp-shims:/opt/node24/bin:/opt/uv-venv/bin:/home/${BENCH_USER}/.local/bin:/usr/local/bin:/usr/bin:/bin")
 if [ -f "$DEPLOY_KEY" ]; then
 	"${RUN[@]}" git config --global core.sshCommand "ssh -i ${DEPLOY_KEY} -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
 fi
 
 # ---- 5. Bench + pinned apps ------------------------------------------------------------------
+# A half-finished earlier init (no marker, no site yet) is safe to discard and redo.
+if [ -d "${BENCH_DIR}" ] && [ ! -e "${BENCH_DIR}/.init-complete" ] && ! ls "${BENCH_DIR}"/sites/*/site_config.json >/dev/null 2>&1; then
+	log "Discarding incomplete bench directory from an earlier attempt (no site data in it)"
+	rm -rf "${BENCH_DIR}"
+fi
 if [ ! -d "${BENCH_DIR}/apps/frappe" ]; then
 	log "bench init (Frappe ${FRAPPE_VERSION}) - several minutes"
 	"${RUN[@]}" uv python install "${PYTHON_VERSION}"
 	"${RUN[@]}" uv tool install "frappe-bench==${BENCH_VERSION}"
 	"${RUN[@]}" bash -c "cd ~ && bench init --frappe-branch ${FRAPPE_VERSION} --python \$(uv python find ${PYTHON_VERSION}) $(basename "${BENCH_DIR}")"
+	touch "${BENCH_DIR}/.init-complete" && chown "${BENCH_USER}" "${BENCH_DIR}/.init-complete"
 fi
 [ -d "${BENCH_DIR}/apps/erpnext" ] || { log "ERPNext ${ERPNEXT_VERSION}"; "${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench get-app erpnext --branch ${ERPNEXT_VERSION} https://github.com/frappe/erpnext"; }
 [ -d "${BENCH_DIR}/apps/commercial_erp" ] || { log "commercial_erp from ${APP_REPO}"; "${RUN[@]}" bash -c "cd ${BENCH_DIR} && bench get-app commercial_erp '${APP_REPO}' --branch '${APP_BRANCH}'"; }
