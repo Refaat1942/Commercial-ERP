@@ -53,3 +53,12 @@ class TestBrandingAndNavigation(IntegrationTestCase):
 
 		brand.apply()
 		self.assertNotIn("ERPNext", get_footer(None))
+
+	def test_numbers_are_shown_in_full(self):
+		arrange.full_numbers()
+		self.assertFalse(frappe.db.count("Number Card", {"show_full_number": 0}))
+
+	def test_shop_has_its_own_sidebar(self):
+		arrange.apply()
+		self.assertTrue(frappe.db.exists("Sidebar", "Shop"))
+		self.assertEqual(frappe.db.get_value("Workspace", "Shop", "module"), "Shop")
