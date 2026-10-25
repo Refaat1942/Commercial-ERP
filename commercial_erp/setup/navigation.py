@@ -6,6 +6,7 @@ layer in the UI brings the standard navigation back."""
 
 SHOP = ("Shop Dashboard", "Workspace", "Shop", "layout-dashboard")
 GUIDE = ("Terms Guide", "Workspace", "Guide", "book-open")
+SETUP_GUIDE = ("Customer Setup Guide", "Workspace", "Setup Guide", "list-checks")
 
 SIDEBARS = {
 	"Selling": [
@@ -159,6 +160,7 @@ SIDEBARS = {
 				("Users", "DocType", "User", "users"),
 				("Role Permissions", "Page", "permission-manager", "shield-check"),
 				("Demo Links", "DocType", "Demo Link", "link"),
+				("FES Settings", "DocType", "FES Settings", "package-check"),
 			],
 		),
 		(
@@ -243,6 +245,7 @@ def _link(module, n, item, child):
 # The "Shop" shell (rail icon next to the modules): dashboard, guide, daily actions, key reports.
 SHOP_SIDEBAR = [
 	SHOP,
+	SETUP_GUIDE,
 	GUIDE,
 	(
 		"Daily Work",
