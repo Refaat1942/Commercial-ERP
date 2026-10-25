@@ -1,6 +1,6 @@
 # Progress / resume notes
 
-Reference repo (ERPNext v17-dev source) is untouched. New, additive directories: `commercial_erp/` (the Frappe app), `deploy/`, `docs/`.
+Reference repo (ERPNext v17-dev source) is untouched. New, additive directory `commercial_erp/` = the Frappe app plus its `deploy/` and `docs/` (becomes the root of the private repo via `git subtree split`).
 
 ## Decisions
 - Stable base: ERPNext v16.52.1 + Frappe v16.53.0 (official tags), Python 3.14, Node 24, MariaDB 11.8, Bench 5.31.1.
