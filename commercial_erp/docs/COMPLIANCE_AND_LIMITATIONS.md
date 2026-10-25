@@ -18,3 +18,9 @@
 - Multi-warehouse works natively; only one default warehouse set up.
 - Print format: one Arabic Sales Invoice format; rendering verified, not printed on paper/PDF (wkhtmltopdf fonts untested).
 - Restore verified into a second site on the same host, not onto a different server.
+
+## Branding / UI notes
+- The product name shown to users is "FES ERP" (login, titles, logo, translated UI strings). ERPNext and Frappe remain the underlying software: their names stay in source code, licence files (`license.txt`, `NOTICE`) and the "Sent via ..." footer of e-mails that upstream hard-codes. GPL-3 attribution is kept on purpose.
+- English UI: strings that upstream never translated keep their original wording; Arabic is complete only to the extent of upstream's Arabic translation plus `translations/ar.csv`.
+- Navigation: modules a one-shop business rarely needs (Manufacturing, Projects, Assets, Quality, CRM, Support, Portal) are hidden from the module rail and advanced sidebar items are hidden using Frappe's own *Dock* / *Custom Sidebar* site layers (reset them in the UI to get the standard navigation back).
+- Demo seed uses invented prices/quantities, applies no tax, and must not be run on a site with real data.

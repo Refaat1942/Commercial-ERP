@@ -1,0 +1,129 @@
+/* Commercial ERP theme: Egyptian trade look (deep teal + warm gold), Arabic-first typography.
+   Overrides CSS variables / a few selectors only; no ERPNext core files are modified. */
+@font-face{font-family:"Cairo";font-weight:400;font-display:swap;src:url(/assets/commercial_erp/fonts/cairo-arabic-400-normal.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Cairo";font-weight:600;font-display:swap;src:url(/assets/commercial_erp/fonts/cairo-arabic-600-normal.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Cairo";font-weight:700;font-display:swap;src:url(/assets/commercial_erp/fonts/cairo-arabic-700-normal.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Cairo";font-weight:400;font-display:swap;src:url(/assets/commercial_erp/fonts/cairo-latin-400-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Cairo";font-weight:600;font-display:swap;src:url(/assets/commercial_erp/fonts/cairo-latin-600-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Cairo";font-weight:700;font-display:swap;src:url(/assets/commercial_erp/fonts/cairo-latin-700-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
+:root{
+	--ce-primary:#0B6B63;
+	--ce-primary-dark:#084F49;
+	--ce-primary-soft:#E6F2F1;
+	--ce-accent:#C8962E;
+	--primary:var(--ce-primary);
+	--primary-color:var(--ce-primary);
+	--btn-primary:var(--ce-primary);
+	--dt-primary-color:var(--ce-primary);
+	--border-primary:var(--ce-primary);
+	--focus-blue:var(--ce-primary);
+	--font-stack:"Cairo","Segoe UI",Tahoma,"Helvetica Neue",Arial,sans-serif;
+}
+body,.btn,input,select,textarea,.form-control,.page-title,.title-text,.navbar,.dropdown-menu{font-family:var(--font-stack)!important}
+body{background:#F4F7F7}
+[data-theme=dark] body{background:var(--bg-color)}
+
+/* top navbar */
+.navbar{background:#fff!important;border-bottom:1px solid #DCE5E4!important;box-shadow:0 1px 0 rgba(8,79,73,.04)}
+[data-theme=dark] .navbar{background:var(--navbar-bg)!important}
+
+/* buttons */
+.btn-primary,.btn-primary:focus{background:var(--ce-primary)!important;border-color:var(--ce-primary)!important;color:#fff!important;font-weight:600;border-radius:8px}
+.btn-primary:hover,.btn-primary:active{background:var(--ce-primary-dark)!important;border-color:var(--ce-primary-dark)!important}
+.btn-default,.btn-secondary{border-radius:8px}
+.primary-action{box-shadow:0 1px 2px rgba(8,79,73,.25)}
+
+/* links, tabs, focus */
+a,.text-primary{color:var(--ce-primary)}
+a:hover{color:var(--ce-primary-dark)}
+.form-control:focus,.frappe-control input:focus,.frappe-control select:focus,.frappe-control textarea:focus{border-color:var(--ce-primary)!important;box-shadow:0 0 0 2px rgba(11,107,99,.15)!important}
+.form-tabs .nav-link.active,.nav-tabs .nav-link.active{color:var(--ce-primary)!important;border-bottom:2px solid var(--ce-accent)!important;font-weight:600}
+
+/* sidebar items */
+.desk-sidebar .sidebar-item-container.active-sidebar>.standard-sidebar-item,
+.list-sidebar .list-link.active,.list-sidebar .sidebar-link.active{background:var(--ce-primary-soft)!important;color:var(--ce-primary-dark)!important;font-weight:600}
+
+/* cards, forms, lists */
+.form-layout .form-section.card-section,.frappe-card,.widget,.layout-main-section,.page-card{border-radius:12px}
+.widget{border:1px solid #E1E9E8;box-shadow:0 1px 2px rgba(8,79,73,.04)}
+.widget.number-widget-box .widget-title,.widget .widget-head .widget-title{font-weight:600}
+.form-section .section-head,.section-head{font-weight:700;color:var(--ce-primary-dark)}
+.page-head{border-bottom:1px solid #DCE5E4}
+.list-row-head,.dt-header{background:var(--ce-primary-soft)!important}
+.indicator-pill.green,.indicator.green{--indicator-color:#1E8E5A}
+
+/* RTL polish: numbers stay LTR inside Arabic text */
+[dir=rtl] .form-control[data-fieldtype=Currency],[dir=rtl] .form-control[data-fieldtype=Float],[dir=rtl] .form-control[data-fieldtype=Int]{direction:ltr;text-align:right}
+
+/* ---- module identity: each module gets its own accent (rail icon, header strip, active sidebar item) ---- */
+.dock-item[aria-label="Selling"]{--ce-m:#1E8E5A}
+.dock-item[aria-label="Buying"]{--ce-m:#D9822B}
+.dock-item[aria-label="Stock"]{--ce-m:#2F6FDE}
+.dock-item[aria-label="Accounts"]{--ce-m:#7B4FC9}
+.dock-item[aria-label="Setup"]{--ce-m:#5E7371}
+.dock-item .dock-item-icon{color:var(--ce-m,inherit)}
+.dock-item.active{background:color-mix(in srgb,var(--ce-m,#0B6B63) 14%,transparent)!important;border-radius:10px}
+.dock-item.active .dock-item-icon{color:var(--ce-m,#0B6B63)}
+body:has(.dock-item.active[aria-label="Selling"]){--ce-module:#1E8E5A}
+body:has(.dock-item.active[aria-label="Buying"]){--ce-module:#D9822B}
+body:has(.dock-item.active[aria-label="Stock"]){--ce-module:#2F6FDE}
+body:has(.dock-item.active[aria-label="Accounts"]){--ce-module:#7B4FC9}
+body:has(.dock-item.active[aria-label="Setup"]){--ce-module:#5E7371}
+.page-head{border-top:4px solid var(--ce-module,var(--ce-primary))}
+.desk-sidebar .sidebar-item-container.active-sidebar>.standard-sidebar-item,
+.sidebar-item.active,.sidebar-item-container.selected>.sidebar-item{background:color-mix(in srgb,var(--ce-module,#0B6B63) 12%,transparent)!important;color:var(--ce-module,#084F49)!important;font-weight:600}
+.shell-header .header-title,.sidebar-header .header-title{color:var(--ce-module,inherit);font-weight:700}
+
+/* upstream logo on the apps screen/rail -> our mark */
+img[src*="erpnext-logo"]{content:url(/assets/commercial_erp/images/logo.svg)}
+
+body[data-route*="shop"]{--ce-module:var(--ce-primary)}
+
+/* language switch button */
+#ce-lang-switch .ce-lang-label{font-weight:700;font-size:12px;letter-spacing:.3px;color:var(--ce-primary)}
+
+/* ======================= login page ======================= */
+body:has(#page-login){
+	min-height:100vh;
+	background:
+		radial-gradient(900px 500px at 88% -8%,rgba(224,174,60,.28),transparent 62%),
+		radial-gradient(700px 500px at -5% 105%,rgba(15,138,126,.55),transparent 60%),
+		linear-gradient(135deg,#052F2B 0%,#0B6B63 58%,#0F8A7E 100%)!important;
+}
+body:has(#page-login) .web-footer,body:has(#page-login) .page-breadcrumbs,body:has(#page-login) .navbar{display:none!important}
+#page-login .page-content-wrapper{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 0}
+#page-login main.container{max-width:none;width:100%}
+#page-login .page-header-wrapper{display:none}
+#page-login .page_content,#page-login main.container{padding-left:16px;padding-right:16px;box-sizing:border-box}
+@media (max-width:480px){#page-login .login-content{padding:30px 22px 26px}#ce-login-lang{top:10px}#page-login .page-content-wrapper{padding-top:64px;align-items:flex-start}}
+#page-login .for-login{display:flex;justify-content:center;align-items:flex-start}
+#page-login .login-content{
+	background:#fff;border:0;border-radius:20px;padding:40px 36px 34px;width:100%;max-width:440px;margin:0 auto;
+	box-shadow:0 30px 80px rgba(2,24,22,.45),0 2px 0 rgba(255,255,255,.4) inset;
+}
+#page-login .page-card-head{align-items:center!important;text-align:center!important}
+#page-login .page-card-head-text{align-items:center;text-align:center}
+#page-login .app-logo{width:72px!important;height:72px!important;max-width:72px;max-height:72px;object-fit:contain;border-radius:18px;background:none!important;padding:0!important;box-shadow:none!important;filter:drop-shadow(0 8px 14px rgba(11,107,99,.35))}
+#page-login .page-card-head h4{color:#073F3A;font-weight:700;font-size:26px;text-align:center}
+#page-login .page-card-subtitle{text-align:center;color:#5E7371}
+#page-login label{color:#34504C;font-weight:600;font-size:13px}
+#page-login .form-control{height:46px;border-radius:12px;border:1.5px solid #D5E2E0;background:#F8FBFB;font-size:15px}
+#page-login .form-control:focus{background:#fff;border-color:#0B6B63!important;box-shadow:0 0 0 4px rgba(11,107,99,.14)!important}
+#page-login .btn-login,#page-login .btn-primary,#page-login button[type=submit]{
+	height:48px;border-radius:12px;background:linear-gradient(135deg,#0B6B63,#0F8A7E)!important;border:0!important;color:#fff!important;
+	font-weight:700;font-size:16px;box-shadow:0 10px 24px rgba(11,107,99,.35);
+}
+#page-login .btn-login:hover,#page-login button[type=submit]:hover{filter:brightness(1.06)}
+#page-login .btn-login-with-email-link,#page-login .btn-default{border-radius:12px;height:44px;background:#EEF5F4;border:0;color:#0B6B63;font-weight:600}
+#page-login .forgot-password-message a,#page-login a{color:#0B6B63;font-weight:600}
+body:has(#page-login)::after{
+	content:"FES ERP";position:fixed;bottom:18px;left:0;right:0;text-align:center;color:rgba(255,255,255,.75);
+	font-size:13px;letter-spacing:.6px;pointer-events:none;
+}
+html[lang="ar"] body:has(#page-login)::after{content:"FES ERP — نظام إدارة المحلات والمخازن والتجارة"}
+html[lang="en"] body:has(#page-login)::after{content:"FES ERP — Shop, warehouse & trade management"}
+#ce-login-lang{position:fixed;top:18px;inset-inline-end:22px;z-index:5}
+#ce-login-lang a{display:inline-block;background:rgba(255,255,255,.14);color:#fff!important;border:1px solid rgba(255,255,255,.3);
+	padding:6px 14px;border-radius:999px;font-weight:600;font-size:13px;text-decoration:none;backdrop-filter:blur(4px)}
+#ce-login-lang a:hover{background:rgba(255,255,255,.26)}
