@@ -81,7 +81,14 @@ if [ ! -x /opt/node24/bin/node ] || [ "$(/opt/node24/bin/node -v)" != "v${NODE_V
 	mkdir -p /opt/node24 && tar -xJf "$T/$F" -C /opt/node24 --strip-components=1
 	rm -rf "$T"
 fi
-[ -x /opt/node24/bin/yarn ] || { env -u npm_config_prefix /opt/node24/bin/npm install -g "yarn@${YARN_VERSION}" >/dev/null; }
+if [ ! -x /opt/node24/bin/yarn ]; then   # npm 11 blocks yarn's install script in global installs: unpack the tarball instead
+	Y="$(mktemp -d)"
+	(cd "$Y" && env -u npm_config_prefix /opt/node24/bin/npm pack "yarn@${YARN_VERSION}" --silent >/dev/null && tar -xzf "yarn-${YARN_VERSION}.tgz")
+	rm -rf /opt/node24/lib/node_modules/yarn && mv "$Y/package" /opt/node24/lib/node_modules/yarn
+	ln -sfn ../lib/node_modules/yarn/bin/yarn.js /opt/node24/bin/yarn
+	ln -sfn ../lib/node_modules/yarn/bin/yarn.js /opt/node24/bin/yarnpkg
+	rm -rf "$Y"
+fi
 [ -x /opt/node24/bin/yarn ] || die "yarn installation failed"
 
 # ---- 4. Bench user, uv, deploy key ---------------------------------------------------------
