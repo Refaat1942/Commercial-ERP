@@ -19,7 +19,7 @@ DOCK_HIDDEN = ["Manufacturing", "Projects", "Assets", "Quality", "CRM", "Support
 
 SIDEBAR_MODULES = ["Selling", "Buying", "Stock", "Accounts", "Setup"]
 
-ARRANGE_VERSION = "5"  # bump to re-apply the site-level navigation layers on existing sites
+ARRANGE_VERSION = "6"  # bump to re-apply the site-level navigation layers on existing sites
 
 
 def apply():
@@ -30,6 +30,7 @@ def apply():
 	from commercial_erp.setup import guide
 
 	guide.ensure()
+	guide.ensure_setup_guide()
 	ensure_shop_sidebar()
 	if frappe.db.get_default("ce_arrange_version") != ARRANGE_VERSION:
 		_reset_layers()
@@ -38,6 +39,13 @@ def apply():
 	for module in SIDEBAR_MODULES:
 		arrange_sidebar(module)
 	set_default_workspace()
+	package = (
+		frappe.db.get_single_value("FES Settings", "package")
+		if frappe.db.exists("DocType", "FES Settings")
+		else None
+	)
+	if package and package != "Full Business":
+		apply_package(package)  # keep the customer's package across layout updates
 
 
 SHOP_SIDEBAR_NAME = "Shop"
@@ -77,6 +85,38 @@ def ensure_shop_sidebar():
 		doc.save()
 	finally:
 		frappe.flags.in_patch = previous
+
+
+PACKAGES = {
+	# package -> modules shown in the rail (Setup and the Shop dashboard are always shown)
+	"Full Business": {"Selling", "Buying", "Stock", "Accounts"},
+	"Accounts and Stock": {"Stock", "Accounts"},
+	"Accounts Only": {"Accounts"},
+	"Stock Only": {"Stock"},
+}
+ALWAYS_SHOWN = {"Setup", SHOP_SIDEBAR_NAME}
+OPTIONAL_MODULES = {"Selling", "Buying", "Stock", "Accounts"}
+
+
+def apply_package(package):
+	"""Show only the modules a customer bought. Nothing is deleted; re-saving with another package restores them."""
+	from frappe.desk.doctype.dock.dock import _save_layer
+
+	visible = PACKAGES.get(package, PACKAGES["Full Business"])
+	rows = [dict(r) for r in get_site_dock(APP)]
+	if not rows:
+		arrange_dock()
+		rows = [dict(r) for r in get_site_dock(APP)]
+	for row in rows:
+		if row.get("link_type") != "Sidebar":
+			continue
+		name = row.get("link_to")
+		if name in OPTIONAL_MODULES:
+			row["hidden"] = 0 if name in visible else 1
+		elif name in ALWAYS_SHOWN:
+			row["hidden"] = 0
+	_save_layer(APP, rows, user=None, require_visible=False)
+	frappe.clear_cache()
 
 
 def _reset_layers():

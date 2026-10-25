@@ -1,0 +1,27 @@
+{
+ "actions": [],
+ "creation": "2026-10-25 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["package", "package_help", "applied_on"],
+ "fields": [
+  {"default": "Full Business", "fieldname": "package", "fieldtype": "Select", "label": "Customer Package", "options": "Full Business\nAccounts and Stock\nAccounts Only\nStock Only", "reqd": 1},
+  {"fieldname": "package_help", "fieldtype": "HTML", "label": "Package Help", "options": "<div dir='auto'><b>Full Business</b>: Sales + Purchases + Stock + Accounts.<br><b>Accounts and Stock</b>: no separate Selling/Buying modules (invoices and receipts stay under Accounts and Stock).<br><b>Accounts Only</b>: ledgers, payments, reports.<br><b>Stock Only</b>: items, warehouses, movements, stock reports.<br><br>After saving, refresh the page (Ctrl+F5). Nothing is deleted; you can switch package at any time.</div>"},
+  {"fieldname": "applied_on", "fieldtype": "Datetime", "label": "Applied On", "read_only": 1}
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-25 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Commercial ERP",
+ "name": "FES Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {"create": 1, "delete": 1, "email": 1, "print": 1, "read": 1, "role": "System Manager", "share": 1, "write": 1}
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

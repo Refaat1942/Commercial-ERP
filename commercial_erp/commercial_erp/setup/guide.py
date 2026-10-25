@@ -155,3 +155,75 @@ def ensure():
 			"custom_blocks": [{"custom_block_name": BLOCK_NAME, "label": BLOCK_NAME}],
 		}
 	).insert(ignore_permissions=True)
+
+
+SETUP_BLOCK = "Setup Checklist"
+SETUP_WORKSPACE = "Setup Guide"
+SETUP_STYLE = """
+.ce-check{max-width:900px}
+.ce-check .bar{height:10px;border-radius:99px;background:#E1E9E8;overflow:hidden;margin:6px 0 16px}
+.ce-check .bar>i{display:block;height:100%;background:linear-gradient(90deg,#0B6B63,#0F8A7E)}
+.ce-check .step{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;border:1px solid #E1E9E8;border-radius:12px;background:#fff;margin-bottom:10px}
+.ce-check .mark{flex:0 0 28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;background:#EEF2F1;color:#6A7C77}
+.ce-check .done .mark{background:#1E8E5A;color:#fff}
+.ce-check .opt .mark{background:#FFF5DB;color:#9A6B00}
+.ce-check .t{font-weight:700;color:#0E1B18}
+.ce-check .h{color:#3F524E;margin-top:2px;line-height:1.6}
+.ce-check a.go{margin-inline-start:auto;white-space:nowrap;font-weight:700}
+"""
+SETUP_SCRIPT = """
+const box = root_element.querySelector('.ce-check-body');
+frappe.call({method: 'commercial_erp.api.setup_status', callback: (r) => {
+  const d = r.message; if (!d) return;
+  const steps = d.steps; const real = steps.filter(s => !s.manual);
+  const done = real.filter(s => s.done).length;
+  const pct = real.length ? Math.round(100 * done / real.length) : 0;
+  const esc = frappe.utils.escape_html;
+  let html = `<div class="text-muted">${esc(__('Package'))}: <b>${esc(d.package)}</b> &nbsp;·&nbsp; ${done} / ${real.length} (${pct}%)</div><div class="bar"><i style="width:${pct}%"></i></div>`;
+  steps.forEach((s, i) => {
+    const cls = s.done ? 'done' : (s.optional ? 'opt' : '');
+    const mark = s.done ? '✓' : (s.manual ? '★' : (i + 1));
+    html += `<div class="step ${cls}"><div class="mark">${mark}</div><div><div class="t">${esc(s.label)}${s.optional ? ' <span class="text-muted">(' + esc(__('Optional')) + ')</span>' : ''}</div><div class="h">${esc(s.hint)}</div></div><a class="go" href="${s.route}">${esc(__('Open'))} ›</a></div>`;
+  });
+  box.innerHTML = html;
+}});
+"""
+
+
+def ensure_setup_guide():
+	html_ = '<div class="ce-check" dir="auto"><div class="ce-check-body text-muted">...</div></div>'
+	fields = {"html": html_, "style": SETUP_STYLE, "script": SETUP_SCRIPT}
+	if frappe.db.exists("Custom HTML Block", SETUP_BLOCK):
+		frappe.db.set_value("Custom HTML Block", SETUP_BLOCK, fields)
+	else:
+		frappe.get_doc({"doctype": "Custom HTML Block", "name": SETUP_BLOCK, "private": 0, **fields}).insert(
+			ignore_permissions=True
+		)
+	blocks = [
+		{
+			"id": "s1",
+			"type": "header",
+			"data": {"text": '<span class="h4">تجهيز العميل خطوة بخطوة</span>', "col": 12},
+		},
+		{"id": "s2", "type": "custom_block", "data": {"custom_block_name": SETUP_BLOCK, "col": 12}},
+	]
+	if frappe.db.exists("Workspace", SETUP_WORKSPACE):
+		frappe.db.set_value(
+			"Workspace", SETUP_WORKSPACE, "content", json.dumps(blocks), update_modified=False
+		)
+		return
+	frappe.get_doc(
+		{
+			"doctype": "Workspace",
+			"name": SETUP_WORKSPACE,
+			"label": SETUP_WORKSPACE,
+			"title": "Customer Setup Guide",
+			"module": "Shop",
+			"public": 1,
+			"type": "Workspace",
+			"icon": "list-checks",
+			"sequence_id": 0.7,
+			"content": json.dumps(blocks),
+			"custom_blocks": [{"custom_block_name": SETUP_BLOCK, "label": SETUP_BLOCK}],
+		}
+	).insert(ignore_permissions=True)

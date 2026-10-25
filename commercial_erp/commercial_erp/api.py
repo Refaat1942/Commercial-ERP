@@ -77,3 +77,10 @@ def check_demo_session():
 		expire_demo_links()
 		frappe.local.login_manager.logout()
 		frappe.throw(frappe._("Your demo has ended."), frappe.AuthenticationError)
+
+
+@frappe.whitelist()
+def setup_status():
+	from commercial_erp.setup.checklist import status
+
+	return status()
