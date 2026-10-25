@@ -12,4 +12,4 @@ read -rsp "MariaDB root password: " ROOTPW; echo
 bench new-site "$TARGET" --mariadb-root-password "$ROOTPW" --admin-password "$(openssl rand -base64 18)"
 bench --site "$TARGET" --force restore "$SQL" --mariadb-root-password "$ROOTPW" ${PUB:+--with-public-files "$PUB"} ${PRIV:+--with-private-files "$PRIV"}
 bench --site "$TARGET" migrate
-echo "Restored into $TARGET. Verify, then: bench drop-site $TARGET (only when done)."
+echo "Restored into $TARGET (not exposed by nginx unless you run bench setup nginx; drop it when done: bench drop-site $TARGET - destructive, your decision)."

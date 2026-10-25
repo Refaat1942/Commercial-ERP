@@ -3,7 +3,7 @@
 ## Daily
 | Task | Command |
 |---|---|
-| Health | `bash deploy/healthcheck.sh 15161` |
+| Health | `bash /home/frappe/commercial_erp_src/deploy/healthcheck.sh 15161` |
 | Processes | `sudo supervisorctl status` |
 | Restart all | `sudo supervisorctl restart all && sudo systemctl reload nginx` |
 | Logs | `~/frappe-bench/logs/*.log` (web, worker, schedule), `/var/log/nginx/*.log`, `/var/log/mysql/`, `/var/log/commercial-erp-backup.log` |

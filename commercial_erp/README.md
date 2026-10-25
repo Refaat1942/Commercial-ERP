@@ -16,4 +16,4 @@ and are used unmodified under their own licenses.
 - Arabic RTL print format for Sales Invoice (`فاتورة مبيعات - عربي`).
 - Scripted setup wizard: `bench --site SITE execute commercial_erp.setup.wizard.run --kwargs '{"company_name": "...", "company_abbr": "..."}'`
 
-See `../docs/` in the repository root for installation, deployment, backup and limitations.
+See `docs/` for installation (docs/DEPLOYMENT.md), operations/backup and limitations.
