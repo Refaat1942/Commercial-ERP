@@ -5,7 +5,12 @@ ok(){ echo "OK   $*"; }; bad(){ echo "FAIL $*"; rc=1; }
 code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "http://127.0.0.1:${PORT}/api/method/ping")
 [ "$code" = "200" ] && ok "HTTP ping on :$PORT" || bad "HTTP ping on :$PORT (got $code)"
 for p in 3306 6379 16379 16380 18000 19000; do
-	if ss -tlnH | awk '{print $4}' | grep -E "^(0\.0\.0\.0|\*|\[::\]):$p$" >/dev/null; then bad "port $p listens on ALL interfaces"; else ok "port $p not public"; fi
+	if ss -tlnH | awk '{print $4}' | grep -E "^(0\.0\.0\.0|\*|\[::\]):$p$" >/dev/null; then
+		# Frappe's realtime (node) service binds all interfaces by design; acceptable only behind an active firewall
+		if [ "$p" = "19000" ] && command -v ufw >/dev/null && ufw status | grep -q '^Status: active' && ! ufw status | grep -qE "^$p(/tcp)? +ALLOW"; then
+			echo "WARN port $p listens on all interfaces but is blocked by ufw (test from outside: curl -m5 http://<ip>:$p must time out)"
+		else bad "port $p listens on ALL interfaces and no active firewall blocks it"; fi
+	else ok "port $p not public"; fi
 done
 systemctl is-active --quiet mariadb && ok mariadb || bad mariadb
 command -v supervisorctl >/dev/null && supervisorctl status 2>/dev/null | grep -v RUNNING | grep -q . && bad "supervisor has non-running programs" || ok "supervisor programs"

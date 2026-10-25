@@ -204,6 +204,7 @@ supervisorctl reread >/dev/null && supervisorctl update >/dev/null
 # ---- 9. Firewall: never enabled automatically ---------------------------------------------------------------
 SSHP="$(sshd -T 2>/dev/null | awk '/^port /{p=$2} END{print p}')"; SSHP="${SSHP:-22}"
 if command -v ufw >/dev/null && ufw status | grep -q '^Status: active'; then
+	ufw deny "${SOCKETIO_PORT}/tcp" >/dev/null   # Frappe realtime (node) binds all interfaces; keep it internal
 	ufw allow "${HTTP_PORT}/tcp" >/dev/null && log "ufw (already active): allowed ${HTTP_PORT}/tcp"
 else
 	log "ufw is not active - left unchanged. To lock the server down yourself (SSH first!):"
