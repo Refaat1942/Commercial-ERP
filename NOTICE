@@ -1,0 +1,5 @@
+commercial_erp is licensed GPL-3.0-or-later (license.txt).
+It is designed to run on ERPNext and Frappe Framework, which are separate works
+(c) Frappe Technologies Pvt. Ltd., licensed under GPL-3.0 (ERPNext) and MIT (Frappe).
+They are installed unmodified from https://github.com/frappe/erpnext and https://github.com/frappe/frappe.
+The ERPNext name/logo are subject to the upstream trademark policy; brand your product separately.

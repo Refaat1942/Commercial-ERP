@@ -1,0 +1,19 @@
+[project]
+name = "commercial_erp"
+authors = [{ name = "Commercial ERP", email = "admin@example.com" }]
+description = "Arabic-first commercial ERP configuration for small Egyptian shops and warehouses, on top of ERPNext v16"
+requires-python = ">=3.14"
+readme = "README.md"
+license = { text = "GPL-3.0-or-later" }
+dynamic = ["version"]
+dependencies = [
+    # frappe and erpnext are installed and pinned by bench (see deploy/versions.env)
+]
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.bench.frappe-dependencies]
+frappe = ">=16.53.0,<17.0.0"
+erpnext = ">=16.52.1,<17.0.0"
